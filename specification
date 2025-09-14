@@ -14,13 +14,29 @@ A parametric OpenSCAD-based system for generating customizable 3D printable sing
 - **Default Colors**: White base (#FFFFFF) with black text/icons (#000000)
 
 ### 2. Imperial Thread Specifications
-**Machine Screw Threads (Priority Order)**:
-- **Coarse**: #4-40, #5-40, #6-32, #8-32, #10-24, #12-24
-- **Fine**: #4-48, #5-44, #6-40, #8-36, #10-32, #12-28
+**Thread Specification Ordering**: Dropdown sorted by size (smallest to largest), with coarse threads before fine threads for each size.
 
-**Fractional Threads**:
-- **UNC (Coarse)**: 1/4-20, 5/16-18, 3/8-16, 7/16-14, 1/2-13, 9/16-12, 5/8-11, 3/4-10, 7/8-9, 1-8
-- **UNF (Fine)**: 1/4-28, 5/16-24, 3/8-24, 7/16-20, 1/2-20, 9/16-18, 5/8-18, 3/4-16, 7/8-14, 1-12
+**Machine Screw Threads (by ascending size)**:
+- **#4**: #4-40 (coarse), #4-48 (fine)
+- **#5**: #5-40 (coarse), #5-44 (fine)
+- **#6**: #6-32 (coarse), #6-40 (fine)
+- **#8**: #8-32 (coarse), #8-36 (fine)
+- **#10**: #10-24 (coarse), #10-32 (fine)
+- **#12**: #12-24 (coarse), #12-28 (fine)
+
+**Fractional Threads (by ascending diameter)**:
+- **1/4"**: 1/4-20 (UNC coarse), 1/4-28 (UNF fine)
+- **5/16"**: 5/16-18 (UNC), 5/16-24 (UNF)
+- **3/8"**: 3/8-16 (UNC), 3/8-24 (UNF)
+- **7/16"**: 7/16-14 (UNC), 7/16-20 (UNF)
+- **1/2"**: 1/2-13 (UNC), 1/2-20 (UNF)
+- **9/16"**: 9/16-12 (UNC), 9/16-18 (UNF)
+- **5/8"**: 5/8-11 (UNC), 5/8-18 (UNF)
+- **3/4"**: 3/4-10 (UNC), 3/4-16 (UNF)
+- **7/8"**: 7/8-9 (UNC), 7/8-14 (UNF)
+- **1"**: 1-8 (UNC), 1-12 (UNF)
+
+**Sorting Logic**: Each diameter group contains coarse thread first (higher number = coarser pitch), followed by fine thread (higher number = finer pitch). This organization allows users to easily find both standard and precision thread options for each fastener size.
 
 ### 3. Fractional Length System
 **Dropdown Interface**: User selects from predefined fractional lengths
