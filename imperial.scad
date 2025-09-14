@@ -405,10 +405,12 @@ module button_bolt_icon(length_mm, y_pos) {
         }
     }
     
-    translate([head_x + 3.5, y_pos, z_pos]) {
-        intersection() {
-            scale([1, 1, 0.6]) cylinder(h = text_height * 1.67, d = 5);
-            translate([0, -2.5, 0]) cube([5, 5, text_height]);
+    translate([head_x + 6, y_pos, z_pos]) {
+        linear_extrude(height = text_height) {
+            intersection() {
+                circle(d = 5);
+                translate([-2.5, -2.5]) square([2.5, 5]);
+            }
         }
     }
     
