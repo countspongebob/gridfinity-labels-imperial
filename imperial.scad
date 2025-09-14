@@ -1,18 +1,19 @@
 ////////////////////////////////////////////////////////
 //        Parts Bin Label Generator - IMPERIAL        //
 //         Fractional & Machine Screw Support         //
+//               Version 16 - Dropdown                //
 ////////////////////////////////////////////////////////
 
 /* [Single Label Mode] */
 hardware_type = "Button head bolt"; // [Phillips head bolt, Socket head bolt, Hex head bolt, Button head bolt, Torx head bolt, Phillips head countersunk, Torx head countersunk, Socket head countersunk, Phillips wood screw, Torx wood screw, Wall anchor, Heat set insert, Standard nut, Lock nut, Standard washer, Spring washer, Custom text, None]
-thread_spec = "#4-40"; // [#4-40, #4-48, #5-40, #5-44, #6-32, #6-40, #8-32, #8-36, #10-24, #10-32, #12-24, #12-28, 1/4-20, 1/4-28, 5/16-18, 5/16-24, 3/8-16, 3/8-24, 7/16-14, 7/16-20, 1/2-13, 1/2-20, 9/16-12, 9/16-18, 5/8-11, 5/8-18, 3/4-10, 3/4-16, 7/8-9, 7/8-14, 1-8, 1-12]
-length_inches = 0.75; // Length in inches
+thread_spec = "#4-40"; // [#4-40, #5-40, #6-32, #8-32, #10-24, #12-24, #4-48, #5-44, #6-40, #8-36, #10-32, #12-28, 1/4-20, 5/16-18, 3/8-16, 7/16-14, 1/2-13, 9/16-12, 5/8-11, 3/4-10, 7/8-9, 1-8, 1/4-28, 5/16-24, 3/8-24, 7/16-20, 1/2-20, 9/16-18, 5/8-18, 3/4-16, 7/8-14, 1-12]
+length_fraction = "3/4"; // [3/8, 1/2, 5/8, 3/4, 7/8, 1, 1-1/8, 1-1/4, 1-3/8, 1-1/2, 1-5/8, 1-3/4, 1-7/8, 2, 2-1/4, 2-1/2, 2-3/4, 3, 3-1/4, 3-1/2, 3-3/4, 4, 4-1/4, 4-1/2, 4-3/4, 5, 5-1/4, 5-1/2, 5-3/4, 6, 6-1/4, 6-1/2, 6-3/4, 7, 7-1/4, 7-1/2, 7-3/4, 8]
 custom_display_text = ""; // Custom text override (leave blank for auto-generation)
 custom_text_only = "Custom"; // Used only when hardware_type is "Custom text"
 
 /* [Multi-Label Mode] */
 enable_multi_label = false;
-multi_label_prompt = "Create socket head bolt labels: 1/4-20 x 1/2, 3/4, 1 inch and 1/4-28 fine x 1/2, 3/4. Generate #8-32 x 1/2, 3/4 and #8-36 fine x 1/2, 5/8. Make nuts: 1/4-20, 1/4-28, #8-32, #8-36."; // Natural language description
+multi_label_prompt = "Create socket head bolt labels: 1/4-20 x 1/2, 3/4, 1 inch and #8-32 x 1/2, 3/4 inch. Generate nuts: 1/4-20, #8-32, #10-24. Make washers for same sizes."; // Natural language description
 
 /* [Label Properties] */
 label_units = 1; // [1:Small (35.8mm), 2:Medium (77.8mm), 3:Large (119.8mm)]
@@ -40,6 +41,9 @@ label_length = (label_units == 1) ? 35.8 : (label_units == 2) ? 77.8 : 119.8;
 text_height = (text_mode == "Raised") ? raised_height : flush_height;
 font_string = str(font_family, ":style=", font_weight);
 max_bolt_length = 20 * label_units;
+
+// Convert fraction string to decimal inches
+length_inches = fraction_to_decimal(length_fraction);
 length_mm = length_inches * 25.4; // Convert to mm for internal calculations
 
 ////////////////////////////////////////////////////////
@@ -47,6 +51,48 @@ length_mm = length_inches * 25.4; // Convert to mm for internal calculations
 ////////////////////////////////////////////////////////
 
 function imperial_to_mm(inches) = inches * 25.4;
+
+// Convert fractional string to decimal
+function fraction_to_decimal(frac_str) =
+    (frac_str == "3/8") ? 0.375 :
+    (frac_str == "1/2") ? 0.5 :
+    (frac_str == "5/8") ? 0.625 :
+    (frac_str == "3/4") ? 0.75 :
+    (frac_str == "7/8") ? 0.875 :
+    (frac_str == "1") ? 1.0 :
+    (frac_str == "1-1/8") ? 1.125 :
+    (frac_str == "1-1/4") ? 1.25 :
+    (frac_str == "1-3/8") ? 1.375 :
+    (frac_str == "1-1/2") ? 1.5 :
+    (frac_str == "1-5/8") ? 1.625 :
+    (frac_str == "1-3/4") ? 1.75 :
+    (frac_str == "1-7/8") ? 1.875 :
+    (frac_str == "2") ? 2.0 :
+    (frac_str == "2-1/4") ? 2.25 :
+    (frac_str == "2-1/2") ? 2.5 :
+    (frac_str == "2-3/4") ? 2.75 :
+    (frac_str == "3") ? 3.0 :
+    (frac_str == "3-1/4") ? 3.25 :
+    (frac_str == "3-1/2") ? 3.5 :
+    (frac_str == "3-3/4") ? 3.75 :
+    (frac_str == "4") ? 4.0 :
+    (frac_str == "4-1/4") ? 4.25 :
+    (frac_str == "4-1/2") ? 4.5 :
+    (frac_str == "4-3/4") ? 4.75 :
+    (frac_str == "5") ? 5.0 :
+    (frac_str == "5-1/4") ? 5.25 :
+    (frac_str == "5-1/2") ? 5.5 :
+    (frac_str == "5-3/4") ? 5.75 :
+    (frac_str == "6") ? 6.0 :
+    (frac_str == "6-1/4") ? 6.25 :
+    (frac_str == "6-1/2") ? 6.5 :
+    (frac_str == "6-3/4") ? 6.75 :
+    (frac_str == "7") ? 7.0 :
+    (frac_str == "7-1/4") ? 7.25 :
+    (frac_str == "7-1/2") ? 7.5 :
+    (frac_str == "7-3/4") ? 7.75 :
+    (frac_str == "8") ? 8.0 :
+    0.75; // Default fallback
 
 function generate_imperial_display_text(thread, length_inches) =
     (length_inches == 0.125) ? str(thread, " x 1/8") :
@@ -64,10 +110,38 @@ function generate_imperial_display_text(thread, length_inches) =
     (length_inches == 0.875) ? str(thread, " x 7/8") :
     (length_inches == 0.9375) ? str(thread, " x 15/16") :
     (length_inches == 1.0) ? str(thread, " x 1") :
+    (length_inches == 1.125) ? str(thread, " x 1-1/8") :
     (length_inches == 1.25) ? str(thread, " x 1-1/4") :
+    (length_inches == 1.375) ? str(thread, " x 1-3/8") :
     (length_inches == 1.5) ? str(thread, " x 1-1/2") :
+    (length_inches == 1.625) ? str(thread, " x 1-5/8") :
     (length_inches == 1.75) ? str(thread, " x 1-3/4") :
+    (length_inches == 1.875) ? str(thread, " x 1-7/8") :
     (length_inches == 2.0) ? str(thread, " x 2") :
+    (length_inches == 2.25) ? str(thread, " x 2-1/4") :
+    (length_inches == 2.5) ? str(thread, " x 2-1/2") :
+    (length_inches == 2.75) ? str(thread, " x 2-3/4") :
+    (length_inches == 3.0) ? str(thread, " x 3") :
+    (length_inches == 3.25) ? str(thread, " x 3-1/4") :
+    (length_inches == 3.5) ? str(thread, " x 3-1/2") :
+    (length_inches == 3.75) ? str(thread, " x 3-3/4") :
+    (length_inches == 4.0) ? str(thread, " x 4") :
+    (length_inches == 4.25) ? str(thread, " x 4-1/4") :
+    (length_inches == 4.5) ? str(thread, " x 4-1/2") :
+    (length_inches == 4.75) ? str(thread, " x 4-3/4") :
+    (length_inches == 5.0) ? str(thread, " x 5") :
+    (length_inches == 5.25) ? str(thread, " x 5-1/4") :
+    (length_inches == 5.5) ? str(thread, " x 5-1/2") :
+    (length_inches == 5.75) ? str(thread, " x 5-3/4") :
+    (length_inches == 6.0) ? str(thread, " x 6") :
+    (length_inches == 6.25) ? str(thread, " x 6-1/4") :
+    (length_inches == 6.5) ? str(thread, " x 6-1/2") :
+    (length_inches == 6.75) ? str(thread, " x 6-3/4") :
+    (length_inches == 7.0) ? str(thread, " x 7") :
+    (length_inches == 7.25) ? str(thread, " x 7-1/4") :
+    (length_inches == 7.5) ? str(thread, " x 7-1/2") :
+    (length_inches == 7.75) ? str(thread, " x 7-3/4") :
+    (length_inches == 8.0) ? str(thread, " x 8") :
     str(thread, " x ", length_inches); // Default for custom lengths
 
 function is_nut_or_washer_type(type) =
@@ -81,38 +155,19 @@ function is_nut_or_washer_type(type) =
 ////////////////////////////////////////////////////////
 
 function parse_multi_label_prompt(prompt) =
-    // Enhanced parser for imperial specifications including fine threads
+    // Enhanced parser for imperial specifications
     [
-        // Coarse thread fractional bolts
         ["Socket head bolt", "1/4-20", "1/4-20 x 1/2", 12.7],
         ["Socket head bolt", "1/4-20", "1/4-20 x 3/4", 19.05],
         ["Socket head bolt", "1/4-20", "1/4-20 x 1", 25.4],
-        
-        // Fine thread fractional bolts
-        ["Socket head bolt", "1/4-28", "1/4-28 x 1/2", 12.7],
-        ["Socket head bolt", "1/4-28", "1/4-28 x 3/4", 19.05],
-        
-        // Coarse thread machine screws
         ["Socket head bolt", "#8-32", "#8-32 x 1/2", 12.7],
         ["Socket head bolt", "#8-32", "#8-32 x 3/4", 19.05],
-        
-        // Fine thread machine screws
-        ["Socket head bolt", "#8-36", "#8-36 x 1/2", 12.7],
-        ["Socket head bolt", "#8-36", "#8-36 x 5/8", 15.875],
-        
-        // Nuts - coarse and fine threads
         ["Standard nut", "1/4-20", "", 0],
-        ["Standard nut", "1/4-28", "", 0],
         ["Standard nut", "#8-32", "", 0],
-        ["Standard nut", "#8-36", "", 0],
         ["Standard nut", "#10-24", "", 0],
-        ["Standard nut", "#10-32", "", 0],
-        
-        // Washers - coarse and fine threads
         ["Standard washer", "1/4-20", "", 0],
-        ["Standard washer", "1/4-28", "", 0],
         ["Standard washer", "#8-32", "", 0],
-        ["Standard washer", "#8-36", "", 0]
+        ["Standard washer", "#10-24", "", 0]
     ];
 
 ////////////////////////////////////////////////////////
@@ -221,7 +276,7 @@ module label_content(type, thread, display_text, length_mm) {
     } else {
         // Bolts and screws
         render_hardware_icon(type, length_mm);
-        final_text = (display_text != "") ? display_text : str(thread, " x ", length_inches);
+        final_text = (custom_display_text != "") ? custom_display_text : str(thread_spec, " x ", length_fraction);
         render_text(final_text);
     }
 }
