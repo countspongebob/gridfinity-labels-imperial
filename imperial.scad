@@ -5,14 +5,14 @@
 
 /* [Single Label Mode] */
 hardware_type = "Button head bolt"; // [Phillips head bolt, Socket head bolt, Hex head bolt, Button head bolt, Torx head bolt, Phillips head countersunk, Torx head countersunk, Socket head countersunk, Phillips wood screw, Torx wood screw, Wall anchor, Heat set insert, Standard nut, Lock nut, Standard washer, Spring washer, Custom text, None]
-thread_spec = "1/4-20"; // [1/4-20, 5/16-18, 3/8-16, 7/16-14, 1/2-13, 9/16-12, 5/8-11, 3/4-10, 7/8-9, 1-8, #4-40, #5-40, #6-32, #8-32, #10-24, #12-24]
+thread_spec = "#4-40"; // [#4-40, #4-48, #5-40, #5-44, #6-32, #6-40, #8-32, #8-36, #10-24, #10-32, #12-24, #12-28, 1/4-20, 1/4-28, 5/16-18, 5/16-24, 3/8-16, 3/8-24, 7/16-14, 7/16-20, 1/2-13, 1/2-20, 9/16-12, 9/16-18, 5/8-11, 5/8-18, 3/4-10, 3/4-16, 7/8-9, 7/8-14, 1-8, 1-12]
 length_inches = 0.75; // Length in inches
 custom_display_text = ""; // Custom text override (leave blank for auto-generation)
 custom_text_only = "Custom"; // Used only when hardware_type is "Custom text"
 
 /* [Multi-Label Mode] */
 enable_multi_label = false;
-multi_label_prompt = "Create socket head bolt labels: 1/4-20 x 1/2, 3/4, 1 inch and #8-32 x 1/2, 3/4 inch. Generate nuts: 1/4-20, #8-32, #10-24. Make washers for same sizes."; // Natural language description
+multi_label_prompt = "Create socket head bolt labels: 1/4-20 x 1/2, 3/4, 1 inch and 1/4-28 fine x 1/2, 3/4. Generate #8-32 x 1/2, 3/4 and #8-36 fine x 1/2, 5/8. Make nuts: 1/4-20, 1/4-28, #8-32, #8-36."; // Natural language description
 
 /* [Label Properties] */
 label_units = 1; // [1:Small (35.8mm), 2:Medium (77.8mm), 3:Large (119.8mm)]
@@ -49,26 +49,26 @@ length_mm = length_inches * 25.4; // Convert to mm for internal calculations
 function imperial_to_mm(inches) = inches * 25.4;
 
 function generate_imperial_display_text(thread, length_inches) =
-    (length_inches == 0.125) ? str(thread, " x 1/8\"") :
-    (length_inches == 0.1875) ? str(thread, " x 3/16\"") :
-    (length_inches == 0.25) ? str(thread, " x 1/4\"") :
-    (length_inches == 0.3125) ? str(thread, " x 5/16\"") :
-    (length_inches == 0.375) ? str(thread, " x 3/8\"") :
-    (length_inches == 0.4375) ? str(thread, " x 7/16\"") :
-    (length_inches == 0.5) ? str(thread, " x 1/2\"") :
-    (length_inches == 0.5625) ? str(thread, " x 9/16\"") :
-    (length_inches == 0.625) ? str(thread, " x 5/8\"") :
-    (length_inches == 0.6875) ? str(thread, " x 11/16\"") :
-    (length_inches == 0.75) ? str(thread, " x 3/4\"") :
-    (length_inches == 0.8125) ? str(thread, " x 13/16\"") :
-    (length_inches == 0.875) ? str(thread, " x 7/8\"") :
-    (length_inches == 0.9375) ? str(thread, " x 15/16\"") :
-    (length_inches == 1.0) ? str(thread, " x 1\"") :
-    (length_inches == 1.25) ? str(thread, " x 1-1/4\"") :
-    (length_inches == 1.5) ? str(thread, " x 1-1/2\"") :
-    (length_inches == 1.75) ? str(thread, " x 1-3/4\"") :
-    (length_inches == 2.0) ? str(thread, " x 2\"") :
-    str(thread, " x ", length_inches, "\""); // Default for custom lengths
+    (length_inches == 0.125) ? str(thread, " x 1/8") :
+    (length_inches == 0.1875) ? str(thread, " x 3/16") :
+    (length_inches == 0.25) ? str(thread, " x 1/4") :
+    (length_inches == 0.3125) ? str(thread, " x 5/16") :
+    (length_inches == 0.375) ? str(thread, " x 3/8") :
+    (length_inches == 0.4375) ? str(thread, " x 7/16") :
+    (length_inches == 0.5) ? str(thread, " x 1/2") :
+    (length_inches == 0.5625) ? str(thread, " x 9/16") :
+    (length_inches == 0.625) ? str(thread, " x 5/8") :
+    (length_inches == 0.6875) ? str(thread, " x 11/16") :
+    (length_inches == 0.75) ? str(thread, " x 3/4") :
+    (length_inches == 0.8125) ? str(thread, " x 13/16") :
+    (length_inches == 0.875) ? str(thread, " x 7/8") :
+    (length_inches == 0.9375) ? str(thread, " x 15/16") :
+    (length_inches == 1.0) ? str(thread, " x 1") :
+    (length_inches == 1.25) ? str(thread, " x 1-1/4") :
+    (length_inches == 1.5) ? str(thread, " x 1-1/2") :
+    (length_inches == 1.75) ? str(thread, " x 1-3/4") :
+    (length_inches == 2.0) ? str(thread, " x 2") :
+    str(thread, " x ", length_inches); // Default for custom lengths
 
 function is_nut_or_washer_type(type) =
     type == "Standard nut" || 
@@ -84,21 +84,21 @@ function parse_multi_label_prompt(prompt) =
     // Enhanced parser for imperial specifications including fine threads
     [
         // Coarse thread fractional bolts
-        ["Socket head bolt", "1/4-20", "1/4-20 x 1/2\"", 12.7],
-        ["Socket head bolt", "1/4-20", "1/4-20 x 3/4\"", 19.05],
-        ["Socket head bolt", "1/4-20", "1/4-20 x 1\"", 25.4],
+        ["Socket head bolt", "1/4-20", "1/4-20 x 1/2", 12.7],
+        ["Socket head bolt", "1/4-20", "1/4-20 x 3/4", 19.05],
+        ["Socket head bolt", "1/4-20", "1/4-20 x 1", 25.4],
         
         // Fine thread fractional bolts
-        ["Socket head bolt", "1/4-28", "1/4-28 x 1/2\"", 12.7],
-        ["Socket head bolt", "1/4-28", "1/4-28 x 3/4\"", 19.05],
+        ["Socket head bolt", "1/4-28", "1/4-28 x 1/2", 12.7],
+        ["Socket head bolt", "1/4-28", "1/4-28 x 3/4", 19.05],
         
         // Coarse thread machine screws
-        ["Socket head bolt", "#8-32", "#8-32 x 1/2\"", 12.7],
-        ["Socket head bolt", "#8-32", "#8-32 x 3/4\"", 19.05],
+        ["Socket head bolt", "#8-32", "#8-32 x 1/2", 12.7],
+        ["Socket head bolt", "#8-32", "#8-32 x 3/4", 19.05],
         
         // Fine thread machine screws
-        ["Socket head bolt", "#8-36", "#8-36 x 1/2\"", 12.7],
-        ["Socket head bolt", "#8-36", "#8-36 x 5/8\"", 15.875],
+        ["Socket head bolt", "#8-36", "#8-36 x 1/2", 12.7],
+        ["Socket head bolt", "#8-36", "#8-36 x 5/8", 15.875],
         
         // Nuts - coarse and fine threads
         ["Standard nut", "1/4-20", "", 0],
@@ -221,7 +221,7 @@ module label_content(type, thread, display_text, length_mm) {
     } else {
         // Bolts and screws
         render_hardware_icon(type, length_mm);
-        final_text = (display_text != "") ? display_text : str(thread, " x ", length_inches, "\"");
+        final_text = (display_text != "") ? display_text : str(thread, " x ", length_inches);
         render_text(final_text);
     }
 }
