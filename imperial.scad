@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////
 //        Parts Bin Label Generator - IMPERIAL        //
 //         Fractional & Machine Screw Support         //
-//               Version 16 - Dropdown                //
+//            Version 16 - Single Label Only          //
 ////////////////////////////////////////////////////////
 
 /* [Single Label Mode] */
@@ -11,14 +11,10 @@ length_fraction = "3/4"; // [3/8, 1/2, 5/8, 3/4, 7/8, 1, 1-1/8, 1-1/4, 1-3/8, 1-
 custom_display_text = ""; // Custom text override (leave blank for auto-generation)
 custom_text_only = "Custom"; // Used only when hardware_type is "Custom text"
 
-/* [Multi-Label Mode] */
-enable_multi_label = false;
-multi_label_prompt = "Create socket head bolt labels: 1/4-20 x 1/2, 3/4, 1 inch and #8-32 x 1/2, 3/4 inch. Generate nuts: 1/4-20, #8-32, #10-24. Make washers for same sizes."; // Natural language description
-
 /* [Label Properties] */
 label_units = 1; // [1:Small (35.8mm), 2:Medium (77.8mm), 3:Large (119.8mm)]
-base_color = "#2C3E50"; // Base label color
-content_color = "#FFFFFF"; // Text and icon color
+base_color = "#FFFFFF"; // Base label color
+content_color = "#000000"; // Text and icon color
 export_mode = "Complete"; // [Complete, Base only, Content only]
 
 /* [Typography] */
@@ -34,7 +30,6 @@ corner_radius = 0.9;
 edge_chamfer = 0.2;
 raised_height = 0.2;
 flush_height = 0.01;
-hole_diameter = 1.5;
 
 // Internal calculations
 label_length = (label_units == 1) ? 35.8 : (label_units == 2) ? 77.8 : 119.8;
@@ -94,56 +89,6 @@ function fraction_to_decimal(frac_str) =
     (frac_str == "8") ? 8.0 :
     0.75; // Default fallback
 
-function generate_imperial_display_text(thread, length_inches) =
-    (length_inches == 0.125) ? str(thread, " x 1/8") :
-    (length_inches == 0.1875) ? str(thread, " x 3/16") :
-    (length_inches == 0.25) ? str(thread, " x 1/4") :
-    (length_inches == 0.3125) ? str(thread, " x 5/16") :
-    (length_inches == 0.375) ? str(thread, " x 3/8") :
-    (length_inches == 0.4375) ? str(thread, " x 7/16") :
-    (length_inches == 0.5) ? str(thread, " x 1/2") :
-    (length_inches == 0.5625) ? str(thread, " x 9/16") :
-    (length_inches == 0.625) ? str(thread, " x 5/8") :
-    (length_inches == 0.6875) ? str(thread, " x 11/16") :
-    (length_inches == 0.75) ? str(thread, " x 3/4") :
-    (length_inches == 0.8125) ? str(thread, " x 13/16") :
-    (length_inches == 0.875) ? str(thread, " x 7/8") :
-    (length_inches == 0.9375) ? str(thread, " x 15/16") :
-    (length_inches == 1.0) ? str(thread, " x 1") :
-    (length_inches == 1.125) ? str(thread, " x 1-1/8") :
-    (length_inches == 1.25) ? str(thread, " x 1-1/4") :
-    (length_inches == 1.375) ? str(thread, " x 1-3/8") :
-    (length_inches == 1.5) ? str(thread, " x 1-1/2") :
-    (length_inches == 1.625) ? str(thread, " x 1-5/8") :
-    (length_inches == 1.75) ? str(thread, " x 1-3/4") :
-    (length_inches == 1.875) ? str(thread, " x 1-7/8") :
-    (length_inches == 2.0) ? str(thread, " x 2") :
-    (length_inches == 2.25) ? str(thread, " x 2-1/4") :
-    (length_inches == 2.5) ? str(thread, " x 2-1/2") :
-    (length_inches == 2.75) ? str(thread, " x 2-3/4") :
-    (length_inches == 3.0) ? str(thread, " x 3") :
-    (length_inches == 3.25) ? str(thread, " x 3-1/4") :
-    (length_inches == 3.5) ? str(thread, " x 3-1/2") :
-    (length_inches == 3.75) ? str(thread, " x 3-3/4") :
-    (length_inches == 4.0) ? str(thread, " x 4") :
-    (length_inches == 4.25) ? str(thread, " x 4-1/4") :
-    (length_inches == 4.5) ? str(thread, " x 4-1/2") :
-    (length_inches == 4.75) ? str(thread, " x 4-3/4") :
-    (length_inches == 5.0) ? str(thread, " x 5") :
-    (length_inches == 5.25) ? str(thread, " x 5-1/4") :
-    (length_inches == 5.5) ? str(thread, " x 5-1/2") :
-    (length_inches == 5.75) ? str(thread, " x 5-3/4") :
-    (length_inches == 6.0) ? str(thread, " x 6") :
-    (length_inches == 6.25) ? str(thread, " x 6-1/4") :
-    (length_inches == 6.5) ? str(thread, " x 6-1/2") :
-    (length_inches == 6.75) ? str(thread, " x 6-3/4") :
-    (length_inches == 7.0) ? str(thread, " x 7") :
-    (length_inches == 7.25) ? str(thread, " x 7-1/4") :
-    (length_inches == 7.5) ? str(thread, " x 7-1/2") :
-    (length_inches == 7.75) ? str(thread, " x 7-3/4") :
-    (length_inches == 8.0) ? str(thread, " x 8") :
-    str(thread, " x ", length_inches); // Default for custom lengths
-
 function is_nut_or_washer_type(type) =
     type == "Standard nut" || 
     type == "Lock nut" || 
@@ -151,71 +96,20 @@ function is_nut_or_washer_type(type) =
     type == "Spring washer";
 
 ////////////////////////////////////////////////////////
-//    IMPERIAL MULTI-LABEL PARSER                    //
-////////////////////////////////////////////////////////
-
-function parse_multi_label_prompt(prompt) =
-    // Enhanced parser for imperial specifications
-    [
-        ["Socket head bolt", "1/4-20", "1/4-20 x 1/2", 12.7],
-        ["Socket head bolt", "1/4-20", "1/4-20 x 3/4", 19.05],
-        ["Socket head bolt", "1/4-20", "1/4-20 x 1", 25.4],
-        ["Socket head bolt", "#8-32", "#8-32 x 1/2", 12.7],
-        ["Socket head bolt", "#8-32", "#8-32 x 3/4", 19.05],
-        ["Standard nut", "1/4-20", "", 0],
-        ["Standard nut", "#8-32", "", 0],
-        ["Standard nut", "#10-24", "", 0],
-        ["Standard washer", "1/4-20", "", 0],
-        ["Standard washer", "#8-32", "", 0],
-        ["Standard washer", "#10-24", "", 0]
-    ];
-
-////////////////////////////////////////////////////////
 //                 MAIN EXECUTION                    //
 ////////////////////////////////////////////////////////
 
-if (enable_multi_label) {
-    generate_multi_labels();
-} else {
-    // Generate display text if not provided
-    final_display_text = (custom_display_text != "") ? custom_display_text :
-        is_nut_or_washer_type(hardware_type) ? "" :
-        generate_imperial_display_text(thread_spec, length_inches);
-    
-    create_single_label(
-        type = hardware_type,
-        thread = thread_spec,
-        display_text = final_display_text,
-        length_mm = length_mm
-    );
-}
+// Generate display text if not provided
+final_display_text = (custom_display_text != "") ? custom_display_text :
+    is_nut_or_washer_type(hardware_type) ? "" :
+    str(thread_spec, " x ", length_fraction);
 
-////////////////////////////////////////////////////////
-//              MULTI-LABEL GENERATION               //
-////////////////////////////////////////////////////////
-
-module generate_multi_labels() {
-    parsed_specs = parse_multi_label_prompt(multi_label_prompt);
-    
-    grid_columns = 3;
-    h_spacing = label_length + 4;
-    v_spacing = 15;
-    
-    for (i = [0 : len(parsed_specs) - 1]) {
-        spec = parsed_specs[i];
-        row = floor(i / grid_columns);
-        col = i % grid_columns;
-        
-        translate([col * h_spacing, -row * v_spacing, 0]) {
-            create_single_label(
-                type = spec[0],
-                thread = spec[1], 
-                display_text = spec[2],
-                length_mm = spec[3]
-            );
-        }
-    }
-}
+create_single_label(
+    type = hardware_type,
+    thread = thread_spec,
+    display_text = final_display_text,
+    length_mm = length_mm
+);
 
 ////////////////////////////////////////////////////////
 //              SINGLE LABEL CREATION                //
@@ -242,22 +136,13 @@ module create_single_label(type, thread, display_text, length_mm) {
 ////////////////////////////////////////////////////////
 
 module label_base() {
-    difference() {
-        // Main label body with rounded corners
-        hull() {
-            for (x = [-label_length/2 + corner_radius, label_length/2 - corner_radius]) {
-                for (y = [-label_width/2 + corner_radius, label_width/2 - corner_radius]) {
-                    translate([x, y, 0]) {
-                        cylinder(h = label_thickness, r = corner_radius);
-                    }
+    // Main label body with rounded corners (no mounting holes)
+    hull() {
+        for (x = [-label_length/2 + corner_radius, label_length/2 - corner_radius]) {
+            for (y = [-label_width/2 + corner_radius, label_width/2 - corner_radius]) {
+                translate([x, y, 0]) {
+                    cylinder(h = label_thickness, r = corner_radius);
                 }
-            }
-        }
-        
-        // Mounting holes
-        for (x = [-(label_length-2)/2, (label_length-2)/2]) {
-            translate([x, 0, -0.1]) {
-                cylinder(h = label_thickness + 0.2, d = hole_diameter);
             }
         }
     }
