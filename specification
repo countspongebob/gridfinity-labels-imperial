@@ -1,227 +1,191 @@
-# 3D Printable Parts Bin Label Generator - IMPERIAL SPECIFICATION
+# 3D Printable Parts Bin Label Generator - IMPERIAL SPECIFICATION v16
 
 ## Overview
-A parametric OpenSCAD-based system for generating customizable 3D printable labels for parts storage bins. This specification covers Imperial hardware (fractional sizes 1/4" through 1" and machine screws #4 through #12) with multi-color 3D printing support and natural language prompt-based multi-label generation.
+A parametric OpenSCAD-based system for generating customizable 3D printable labels for parts storage bins. This specification covers Imperial hardware (machine screws #4-40 through 1"-12) with multi-color 3D printing support, fractional length dropdown interface, and natural language prompt-based multi-label generation.
 
 ## Core Requirements
 
 ### 1. Label Physical Specifications
-- **Base Dimensions**: Configurable length based on Y-units (1-3 units: 35.8mm, 77.8mm, 119.8mm), fixed width 11.5mm
-- **Height**: 0.8mm base with 0.2mm raised text/icons
+- **Base Dimensions**: Configurable length based on units (1-3 units: 35.8mm, 77.8mm, 119.8mm), fixed width 11.5mm
+- **Height**: 0.8mm base with 0.2mm raised text/icons (or 0.01mm flush text)
 - **Material**: Single or dual-color 3D printing support
 - **Mounting**: 1.5mm diameter holes at each end for attachment
 - **Edge Treatment**: Rounded corners with configurable radius (default 0.9mm) and chamfered top/bottom edges (default 0.2mm)
 
-### 2. Text Display System
-- **Dual Text Fields**:
-  - `thread_spec`: Thread specification for nuts/washers (e.g., "1/4-20", "#8-32", "#10-24")  
-  - `display_text`: Complete specification for bolts/screws (e.g., "1/4-20 x 3/4\"", "#8-32 x 1/2\"")
-- **Typography**: Configurable font family, style, and size with extensive font library support
-- **Text Types**: Raised text (0.2mm height) or flush text (0.01mm for multi-material printing)
+### 2. Imperial Thread Specifications
+**Machine Screw Threads (Priority Order)**:
+- **Coarse**: #4-40, #5-40, #6-32, #8-32, #10-24, #12-24
+- **Fine**: #4-48, #5-44, #6-40, #8-36, #10-32, #12-28
 
-### 3. Hardware Component Support
-Must support visual icons and appropriate text for:
+**Fractional Threads**:
+- **UNC (Coarse)**: 1/4-20, 5/16-18, 3/8-16, 7/16-14, 1/2-13, 9/16-12, 5/8-11, 3/4-10, 7/8-9, 1-8
+- **UNF (Fine)**: 1/4-28, 5/16-24, 3/8-24, 7/16-20, 1/2-20, 9/16-18, 5/8-18, 3/4-16, 7/8-14, 1-12
 
-#### Bolts/Screws (use display_text):
-- Phillips head bolt
-- Socket head bolt  
-- Hex head bolt
-- Button head bolt
-- Torx head bolt
-- Countersunk varieties (Phillips, Torx, Socket)
-- Wood screws (Phillips, Torx) with pointed tips
-- Wall anchors
-- Heat set inserts
+### 3. Fractional Length System
+**Dropdown Interface**: User selects from predefined fractional lengths
+- **3/8" to 2"**: Increments of 1/8" (3/8, 1/2, 5/8, 3/4, 7/8, 1, 1-1/8, 1-1/4, 1-3/8, 1-1/2, 1-5/8, 1-3/4, 1-7/8, 2)
+- **2-1/4" to 8"**: Increments of 1/4" (2-1/4, 2-1/2, 2-3/4, 3, 3-1/4, 3-1/2, 3-3/4, 4, 4-1/4, 4-1/2, 4-3/4, 5, 5-1/4, 5-1/2, 5-3/4, 6, 6-1/4, 6-1/2, 6-3/4, 7, 7-1/4, 7-1/2, 7-3/4, 8)
+- **Total**: 38 fractional options
 
-#### Nuts/Washers (use thread_spec field):
-- Standard nuts
-- Lock nuts  
-- Standard washers
-- Spring washers
+### 4. Hardware Component Types
+**Bolts & Screws**:
+- Phillips head bolt, Socket head bolt, Hex head bolt, Button head bolt, Torx head bolt
+- Phillips/Torx/Socket head countersunk
+- Phillips/Torx wood screws
+- Wall anchors, Heat set inserts
 
-### 4. Imperial Thread Specifications
+**Fasteners**:
+- Standard nuts, Lock nuts
+- Standard washers, Spring washers
 
-#### Fractional Sizes (1/4" through 1"):
-- **1/4-20**: 1/4" diameter, 20 threads per inch
-- **5/16-18**: 5/16" diameter, 18 threads per inch  
-- **3/8-16**: 3/8" diameter, 16 threads per inch
-- **7/16-14**: 7/16" diameter, 14 threads per inch
-- **1/2-13**: 1/2" diameter, 13 threads per inch
-- **9/16-12**: 9/16" diameter, 12 threads per inch
-- **5/8-11**: 5/8" diameter, 11 threads per inch
-- **3/4-10**: 3/4" diameter, 10 threads per inch
-- **7/8-9**: 7/8" diameter, 9 threads per inch
-- **1-8**: 1" diameter, 8 threads per inch
+### 5. Display Text Generation
+**CRITICAL REQUIREMENT**: Single source of truth for display text generation to prevent inconsistencies.
 
-#### Machine Screw Sizes (#4 through #12):
-- **#4-40**: #4 diameter, 40 threads per inch
-- **#5-40**: #5 diameter, 40 threads per inch
-- **#6-32**: #6 diameter, 32 threads per inch
-- **#8-32**: #8 diameter, 32 threads per inch
-- **#10-24**: #10 diameter, 24 threads per inch
-- **#12-24**: #12 diameter, 24 threads per inch
-
-#### Length Specifications:
-- **Input Method**: Decimal inches (0.5 = 1/2", 0.75 = 3/4", etc.)
-- **Display Format**: Proper fractions (1/2", 3/4", 1", 1-1/4", etc.)
-- **Internal Calculations**: All lengths converted to millimeters for consistent scaling
-
-### 5. Icon Design Requirements
-Each hardware type requires two visual representations:
-- **Top View**: Authentic head shape (Phillips cross, Torx star, hex, etc.)
-- **Side View**: Profile showing head thickness and general proportions
-- **Stem Representation**: Bolt length visualization with automatic scaling and split representation for lengths exceeding display limits
-- **Scaling**: Imperial inputs converted to millimeters for consistent icon scaling
-
-### 6. Natural Language Multi-Label Generation System
-#### Input Method:
-- **Prompt-Based Interface**: Text area where users can describe their label requirements in natural language
-- **Example Prompts**:
-  - "Create labels for 1/4-20 socket head bolts in lengths 1/2, 3/4, 1 inch"
-  - "Generate Phillips head bolt labels: #8-32 x 1/2, 3/4, 1 inch"
-  - "Make washer labels for 1/4-20, #8-32, #10-24 and nut labels for same sizes"
-  - "Button head bolts: 1/4-20 x 5/8, 3/4, 1 inch and #10-24 x 1/2, 3/4 inch"
-
-#### Parsing Requirements:
-- **Component Recognition**: Identify hardware types from common names and abbreviations
-- **Size Extraction**: Parse fractional (1/4-20, 3/8-16) and machine screw (#8-32, #10-24) specifications
-- **Length Processing**: Handle fractional inch measurements (1/2", 3/4", 7/8", 1", etc.)
-- **Fraction Conversion**: Convert common fractions to decimal equivalents for calculations
-- **Error Handling**: Provide feedback for unclear or unsupported specifications
-
-### 7. Fractional Display Logic
-#### Common Fractions Supported:
-- **1/8"** (0.125")
-- **3/16"** (0.1875")
-- **1/4"** (0.25")
-- **5/16"** (0.3125")
-- **3/8"** (0.375")
-- **7/16"** (0.4375")
-- **1/2"** (0.5")
-- **9/16"** (0.5625")
-- **5/8"** (0.625")
-- **11/16"** (0.6875")
-- **3/4"** (0.75")
-- **13/16"** (0.8125")
-- **7/8"** (0.875")
-- **15/16"** (0.9375")
-- **1"** (1.0")
-- **1-1/4"** (1.25")
-- **1-1/2"** (1.5")
-- **1-3/4"** (1.75")
-- **2"** (2.0")
-
-### 8. User Interface Structure
-#### Parameter Hierarchy:
-1. **Single Label Mode**: Hardware type, thread specification, length (inches), display text
-2. **Multi-Label Mode**: Enable checkbox, prompt text area
-3. **Label Properties**: Size, colors, export mode
-4. **Typography**: Font settings, text mode
-5. **Advanced Settings**: Physical dimensions, rendering quality
-
-### 9. Multi-Color Printing Support
-- **Export Modes**: 
-  - Complete (single color)
-  - Base only (label substrate)
-  - Content only (text and icons)
-- **File Formats**: STL export for each component, combined in slicer software
-- **Color Assignment**: Base uses `base_color`, content uses `content_color`
-
-### 10. Parametric Customization
-#### User-Configurable Parameters:
-- Multi-label prompt (text area for natural language input)
-- Component type (dropdown selection for single labels)
-- Thread specification: Dropdown with all fractional and machine screw sizes
-- Hardware length (numeric input in decimal inches)
-- Display text (text field with automatic fractional formatting)
-- Label size (Y-units: 1-3)
-- Colors (hex codes for base and content)
-- Font selection and styling
-- Text size and type (raised/flush)
-- Export mode (complete/base only/content only)
-
-#### Advanced Settings:
-- Label dimensions (width, height, radius, chamfer)
-- Rendering quality ($fs, $fa)
-- Multi-label layout configuration (columns, spacing)
-
-### 11. Conversion and Scaling Logic
-- **Length Conversion**: All imperial inputs converted to millimeters for internal calculations
-  - 1/2" = 12.7mm
-  - 3/4" = 19.05mm
-  - 1" = 25.4mm
-- **Icon Scaling**: Consistent scaling regardless of input method
-- **Maximum Display Length**: 20mm × Y_units with overflow handling
-- **Thread Pitch Standards**: Use industry-standard combinations
-
-### 12. Natural Language Processing Requirements
-#### Supported Patterns:
-- **Hardware Types**: "socket head bolt", "phillips screw", "hex nut", "spring washer"
-- **Fractional Formats**: "1/4-20", "3/8-16 x 3/4", "1/2-13 x 1 inch"
-- **Machine Screw Formats**: "#8-32", "#10-24 x 1/2", "#12-24 x 3/4 inch"
-- **Length Specifications**: "x 1/2", "x 3/4 inch", "x 1\""
-- **Quantity Expressions**: "sizes 1/4-20, #8-32, #10-24", "lengths 1/2, 3/4, 1 inch"
-
-#### Processing Pipeline:
-1. **Tokenization**: Split prompt into meaningful components
-2. **Entity Recognition**: Identify hardware types, sizes, and lengths
-3. **Validation**: Check for supported component types and standard thread combinations
-4. **Expansion**: Generate individual label specifications from ranges/series
-5. **Formatting**: Create properly formatted display text with correct fractions
-
-### 13. Icon Scaling Logic
-- **Maximum Display Length**: 20mm × Y_units
-- **Overflow Handling**: Split representation with gap for lengths exceeding maximum
-- **Proportional Scaling**: Icons scale proportionally after imperial-to-metric conversion
-- **Minimum Legibility**: Ensure icons remain recognizable at small scales
-
-### 14. Code Architecture Requirements
-- **Modular Design**: Separate modules for each component type
-- **Imperial Conversion Handler**: Functions to manage inch-to-millimeter conversions
-- **Natural Language Parser**: Dedicated module for prompt interpretation
-- **Parametric Base**: Reusable label base with configurable dimensions
-- **Icon Library**: Standardized icon generation modules with consistent positioning
-- **Fraction Display Tables**: Lookup tables for decimal-to-fraction conversion
-
-### 15. Quality Assurance
-- **Dimensional Accuracy**: All measurements converted to millimeters for consistent scaling
-- **Thread Standard Compliance**: Use industry-standard imperial thread combinations
-- **Print Compatibility**: Geometry suitable for FDM 3D printing
-- **Multi-Color Alignment**: Perfect registration between base and content components
-- **Fraction Accuracy**: Proper display of imperial fractional measurements
-
-### 16. Example Multi-Label Prompts
+**Primary Path**: Direct use of dropdown string values
 ```
-Create socket head bolt labels with coarse and fine threads:
-- 1/4-20 coarse x 1/2, 3/4, 1 inch
-- 1/4-28 fine x 1/2, 3/4 inch
-- #8-32 coarse x 1/2, 3/4 inch
-- #8-36 fine x 1/2, 5/8 inch
-
-Generate complete fastener set with fine thread options:
-- Button head bolts: 3/8-16 coarse x 3/4, 1 inch, 3/8-24 fine x 1/2, 3/4 inch
-- Nuts: 3/8-16, 3/8-24, #10-24, #10-32
-- Washers: 3/8-16, 3/8-24, #10-24, #10-32
-
-Make precision fastener labels:
-- Fine thread socket bolts: 1/4-28 x 1/2, 5/8, 1/2-20 x 3/4, 1 inch
-- Fine thread machine screws: #6-40 x 1/2, #8-36 x 5/8, #10-32 x 3/4
-- Matching fine thread nuts for all sizes above
-
-Wood screw labels with mixed thread types:
-- Phillips coarse: #6-32 x 3/4, #8-32 x 1, #10-24 x 1-1/4
-- Phillips fine: #8-36 x 5/8, #10-32 x 3/4, #12-28 x 1 inch
-- Torx coarse: #8-32 x 3/4, #10-24 x 1 inch
-- Torx fine: #8-36 x 1/2, #10-32 x 5/8 inch
+display_text = str(thread_spec, " x ", length_fraction)
+// Example: "#4-40 x 3/4"
 ```
+
+**Prohibited**: Multiple conversion paths that could show decimals instead of fractions
+- ❌ Convert fraction → decimal → back to fraction
+- ✅ Use original dropdown strings directly
+
+**Text Format Standards**:
+- No quotation marks in printed output (`"` symbols prohibited)
+- Machine screws: `#8-32 x 1/2`
+- Fractional: `1/4-20 x 3/4`
+- Nuts/washers: Thread specification only (`#8-32`, `1/4-20`)
+
+### 6. Icon Generation System
+**Dimensional Scaling**: Icons scale proportionally with length_mm converted from fractional inches
+- **Conversion**: `length_mm = length_inches * 25.4`
+- **Maximum Display Length**: `20 * label_units` (prevents overflow)
+- **Long Bolt Handling**: Split stem with gap for bolts exceeding max length
+
+**Icon Types**:
+- **Phillips**: Cross pattern in circular head
+- **Socket/Hex**: Geometric drive patterns (hexagonal)
+- **Torx**: Six-pointed star pattern
+- **Button**: Domed head profile
+- **Countersunk**: Tapered head profile
+- **Wood Screws**: Pointed tip extension
+- **Nuts**: Hexagonal profile with thread indication
+- **Washers**: Ring profile with thickness indicator
+
+### 7. Multi-Label Generation
+**Natural Language Processing**: Parse user prompts for batch label creation
+```
+"Create socket head bolt labels: 1/4-20 x 1/2, 3/4, 1 inch and #8-32 x 1/2, 3/4 inch. 
+Generate nuts: 1/4-20, #8-32, #10-24. Make washers for same sizes."
+```
+
+**Parser Requirements**:
+- Recognize thread specifications (machine screw and fractional)
+- Extract length ranges and series
+- Support both fine and coarse thread specifications
+- Generate proper fractional display text
+- Handle mixed hardware types in single prompt
+
+### 8. User Interface Parameters
+**Single Label Mode**:
+- `hardware_type`: Dropdown of all supported component types
+- `thread_spec`: Ordered dropdown (machine screws first, then fractional)
+- `length_fraction`: Dropdown of 38 fractional options (3/8" to 8")
+- `custom_display_text`: Override field for special cases
+
+**Multi-Label Mode**:
+- `enable_multi_label`: Boolean toggle
+- `multi_label_prompt`: Natural language text input
+
+**Visual Properties**:
+- `label_units`: Size selection (1=Small, 2=Medium, 3=Large)
+- `base_color`/`content_color`: Hex color values for dual-color printing
+- `text_mode`: Raised (0.2mm) or Flush (0.01mm) text
+- `export_mode`: Complete, Base only, or Content only
+
+### 9. Code Architecture Requirements
+**Data Consistency**:
+- **Single Source Principle**: All display text must derive from dropdown string values
+- **No Decimal Conversion**: Avoid converting fractional strings to decimal then back
+- **Parameter Validation**: Ensure dropdown selections map correctly to internal calculations
+
+**Modular Design**:
+- Separate icon generation modules for each hardware type
+- Unified text rendering system
+- Parametric label base with configurable dimensions
+- Centralized fractional-to-decimal conversion for internal calculations only
+
+**Function Separation**:
+```
+fraction_to_decimal(string) → decimal  // For internal calculations only
+render_text(string) → 3D text         // Uses string values directly
+generate_display_text() → DEPRECATED   // Avoid multiple conversion paths
+```
+
+### 10. Quality Assurance
+**Dimensional Accuracy**: All measurements converted to millimeters for consistent internal calculations
+- Thread specifications remain as strings for display
+- Length calculations use converted millimeter values
+- Icon scaling uses millimeter measurements
+
+**Print Compatibility**:
+- Minimum feature size: 0.4mm (nozzle width compatibility)
+- No overhangs >45° without support
+- Clean STL export without non-manifold surfaces
+
+**Multi-Color Registration**: Perfect alignment between base and content layers
+- Shared coordinate system
+- Consistent Z-height references
+- No gaps or overlaps in dual-color printing
+
+### 11. Error Prevention
+**Common Pitfalls to Avoid**:
+1. **Multiple Display Text Paths**: Always use dropdown strings directly
+2. **Decimal Display**: Never show "0.75" instead of "3/4"
+3. **Thread Order**: Machine screws (#4-40) before fractional (1/4-20)
+4. **Quotation Marks**: Remove all `\"` from display text generation
+5. **Inconsistent Parameters**: Ensure variable names match between functions
+
+**Validation Requirements**:
+- Verify fractional dropdown values convert correctly to millimeters
+- Test that all 38 length options generate proper display text
+- Confirm thread specification ordering in dropdown
+- Validate icon scaling across full length range
+
+### 12. Example Multi-Label Prompts
+```
+Create socket head bolt labels: 1/4-20 x 1/2, 3/4, 1 inch and #8-32 x 1/2, 3/4 inch.
+
+Generate complete fastener set:
+- Button head bolts: 1/4-20 x 5/8, 3/4, 1 inch
+- Nuts: 1/4-20, #8-32, #10-24
+- Washers: 1/4-20, #8-32, #10-24
+
+Make precision hardware:
+- Socket head bolts (fine thread): 1/4-28 x 1/2, 3/4
+- Machine screws (coarse): #8-32 x 5/8, 3/4
+- Machine screws (fine): #8-36 x 1/2, 5/8
+```
+
+### 13. Version Control
+**v16 Enhancements**:
+- Fractional length dropdown interface (38 options)
+- Single source of truth for display text generation
+- Eliminated decimal display issues
+- Preserved v15 thread ordering and quotation mark fixes
+
+**Critical Fixes Maintained**:
+- Thread specification priority order (machine screws first)
+- Quotation mark removal from all display text
+- Consistent parameter naming across functions
 
 ## Implementation Considerations
-- Implement robust natural language processing for imperial specifications
+- Prioritize dropdown string values over calculated values for display
+- Implement comprehensive prompt parsing with error recovery
 - Use OpenSCAD's parametric capabilities for maximum flexibility
-- Create comprehensive prompt parsing with imperial fraction recognition
 - Optimize rendering performance for large multi-label operations
-- Ensure accurate imperial-to-metric conversion throughout
-- Support for future imperial hardware types through extensible architecture
-- Provide extensive example library with proper imperial formatting
+- Support future Imperial hardware types through extensible architecture
+- Maintain backward compatibility with existing label designs
 
-This specification provides a comprehensive foundation for creating Imperial hardware labels with precise fractional specifications and user-friendly natural language interfaces optimized for American standard fasteners.
+This specification ensures robust Imperial hardware label generation with user-friendly fractional interfaces and prevents common implementation pitfalls through clear architectural guidelines.
