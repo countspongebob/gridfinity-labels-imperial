@@ -1,7 +1,7 @@
 # 3D Printable Parts Bin Label Generator - IMPERIAL SPECIFICATION v16
 
 ## Overview
-A parametric OpenSCAD-based system for generating customizable 3D printable labels for parts storage bins. This specification covers Imperial hardware (machine screws #4-40 through 1"-12) with multi-color 3D printing support, fractional length dropdown interface, and natural language prompt-based multi-label generation.
+A parametric OpenSCAD-based system for generating customizable 3D printable single labels for parts storage bins. This specification covers Imperial hardware (machine screws #4-40 through 1"-12) with dual-color 3D printing support and fractional length dropdown interface.
 
 ## Core Requirements
 
@@ -9,8 +9,9 @@ A parametric OpenSCAD-based system for generating customizable 3D printable labe
 - **Base Dimensions**: Configurable length based on units (1-3 units: 35.8mm, 77.8mm, 119.8mm), fixed width 11.5mm
 - **Height**: 0.8mm base with 0.2mm raised text/icons (or 0.01mm flush text)
 - **Material**: Single or dual-color 3D printing support
-- **Mounting**: 1.5mm diameter holes at each end for attachment
+- **Mounting**: Clean solid base with no holes or attachment points
 - **Edge Treatment**: Rounded corners with configurable radius (default 0.9mm) and chamfered top/bottom edges (default 0.2mm)
+- **Default Colors**: White base (#FFFFFF) with black text/icons (#000000)
 
 ### 2. Imperial Thread Specifications
 **Machine Screw Threads (Priority Order)**:
@@ -38,7 +39,13 @@ A parametric OpenSCAD-based system for generating customizable 3D printable labe
 - Standard nuts, Lock nuts
 - Standard washers, Spring washers
 
-### 5. Display Text Generation
+### 5. Single Label Generation Only
+**Scope**: System generates one label at a time based on user selections
+- **No batch processing**: Multi-label generation functionality removed
+- **Focused interface**: Single hardware type, thread, and length selection
+- **Simplified workflow**: Direct parameter selection without parsing
+
+### 6. Display Text Generation
 **CRITICAL REQUIREMENT**: Single source of truth for display text generation to prevent inconsistencies.
 
 **Primary Path**: Direct use of dropdown string values
@@ -57,7 +64,7 @@ display_text = str(thread_spec, " x ", length_fraction)
 - Fractional: `1/4-20 x 3/4`
 - Nuts/washers: Thread specification only (`#8-32`, `1/4-20`)
 
-### 6. Icon Generation System
+### 7. Icon Generation System
 **Dimensional Scaling**: Icons scale proportionally with length_mm converted from fractional inches
 - **Conversion**: `length_mm = length_inches * 25.4`
 - **Maximum Display Length**: `20 * label_units` (prevents overflow)
@@ -73,36 +80,25 @@ display_text = str(thread_spec, " x ", length_fraction)
 - **Nuts**: Hexagonal profile with thread indication
 - **Washers**: Ring profile with thickness indicator
 
-### 7. Multi-Label Generation
-**Natural Language Processing**: Parse user prompts for batch label creation
-```
-"Create socket head bolt labels: 1/4-20 x 1/2, 3/4, 1 inch and #8-32 x 1/2, 3/4 inch. 
-Generate nuts: 1/4-20, #8-32, #10-24. Make washers for same sizes."
-```
-
-**Parser Requirements**:
-- Recognize thread specifications (machine screw and fractional)
-- Extract length ranges and series
-- Support both fine and coarse thread specifications
-- Generate proper fractional display text
-- Handle mixed hardware types in single prompt
-
 ### 8. User Interface Parameters
-**Single Label Mode**:
+**Single Label Mode Only**:
 - `hardware_type`: Dropdown of all supported component types
 - `thread_spec`: Ordered dropdown (machine screws first, then fractional)
 - `length_fraction`: Dropdown of 38 fractional options (3/8" to 8")
 - `custom_display_text`: Override field for special cases
-
-**Multi-Label Mode**:
-- `enable_multi_label`: Boolean toggle
-- `multi_label_prompt`: Natural language text input
+- `custom_text_only`: Text for custom labels
 
 **Visual Properties**:
 - `label_units`: Size selection (1=Small, 2=Medium, 3=Large)
-- `base_color`/`content_color`: Hex color values for dual-color printing
+- `base_color`: Default white (#FFFFFF), user configurable
+- `content_color`: Default black (#000000), user configurable
 - `text_mode`: Raised (0.2mm) or Flush (0.01mm) text
 - `export_mode`: Complete, Base only, or Content only
+
+**Typography Controls**:
+- `font_family`: Roboto, Arial, Open Sans, Noto Sans, Liberation Sans
+- `font_weight`: Regular, Bold, Light, Medium
+- `text_size`: Configurable text size (default 4.0)
 
 ### 9. Code Architecture Requirements
 **Data Consistency**:
@@ -113,15 +109,21 @@ Generate nuts: 1/4-20, #8-32, #10-24. Make washers for same sizes."
 **Modular Design**:
 - Separate icon generation modules for each hardware type
 - Unified text rendering system
-- Parametric label base with configurable dimensions
+- Parametric label base with configurable dimensions (no holes)
 - Centralized fractional-to-decimal conversion for internal calculations only
 
 **Function Separation**:
 ```
 fraction_to_decimal(string) → decimal  // For internal calculations only
 render_text(string) → 3D text         // Uses string values directly
-generate_display_text() → DEPRECATED   // Avoid multiple conversion paths
+create_single_label() → Complete label // Single label generation
 ```
+
+**Removed Functionality**:
+- No multi-label parsing or generation
+- No natural language processing
+- No batch operations
+- No mounting hole generation
 
 ### 10. Quality Assurance
 **Dimensional Accuracy**: All measurements converted to millimeters for consistent internal calculations
@@ -133,11 +135,13 @@ generate_display_text() → DEPRECATED   // Avoid multiple conversion paths
 - Minimum feature size: 0.4mm (nozzle width compatibility)
 - No overhangs >45° without support
 - Clean STL export without non-manifold surfaces
+- Solid base design with no holes or cavities
 
-**Multi-Color Registration**: Perfect alignment between base and content layers
+**Dual-Color Registration**: Perfect alignment between base and content layers
 - Shared coordinate system
 - Consistent Z-height references
 - No gaps or overlaps in dual-color printing
+- High contrast default colors (white/black)
 
 ### 11. Error Prevention
 **Common Pitfalls to Avoid**:
@@ -146,46 +150,46 @@ generate_display_text() → DEPRECATED   // Avoid multiple conversion paths
 3. **Thread Order**: Machine screws (#4-40) before fractional (1/4-20)
 4. **Quotation Marks**: Remove all `\"` from display text generation
 5. **Inconsistent Parameters**: Ensure variable names match between functions
+6. **Multi-label Remnants**: No batch processing code or interfaces
 
 **Validation Requirements**:
 - Verify fractional dropdown values convert correctly to millimeters
 - Test that all 38 length options generate proper display text
 - Confirm thread specification ordering in dropdown
 - Validate icon scaling across full length range
+- Ensure clean base geometry without holes
 
-### 12. Example Multi-Label Prompts
-```
-Create socket head bolt labels: 1/4-20 x 1/2, 3/4, 1 inch and #8-32 x 1/2, 3/4 inch.
-
-Generate complete fastener set:
-- Button head bolts: 1/4-20 x 5/8, 3/4, 1 inch
-- Nuts: 1/4-20, #8-32, #10-24
-- Washers: 1/4-20, #8-32, #10-24
-
-Make precision hardware:
-- Socket head bolts (fine thread): 1/4-28 x 1/2, 3/4
-- Machine screws (coarse): #8-32 x 5/8, 3/4
-- Machine screws (fine): #8-36 x 1/2, 5/8
-```
+### 12. Default Configuration
+**Standard Settings**:
+- Label size: Small (35.8mm length)
+- Colors: White base with black text
+- Text: Raised 0.2mm above base
+- Font: Roboto Bold, size 4.0
+- Thread: #4-40 (most common machine screw)
+- Length: 3/4" (common fastener length)
 
 ### 13. Version Control
 **v16 Enhancements**:
 - Fractional length dropdown interface (38 options)
 - Single source of truth for display text generation
 - Eliminated decimal display issues
+- Removed all multi-label functionality
+- Changed default colors to white base/black text
+- Removed mounting holes from base design
 - Preserved v15 thread ordering and quotation mark fixes
 
-**Critical Fixes Maintained**:
-- Thread specification priority order (machine screws first)
-- Quotation mark removal from all display text
-- Consistent parameter naming across functions
+**Architecture Simplifications**:
+- Single label generation only
+- Direct parameter selection
+- No parsing or batch operations
+- Clean base design without attachment points
 
 ## Implementation Considerations
 - Prioritize dropdown string values over calculated values for display
-- Implement comprehensive prompt parsing with error recovery
 - Use OpenSCAD's parametric capabilities for maximum flexibility
-- Optimize rendering performance for large multi-label operations
+- Focus on single label perfection rather than batch operations
+- Maintain clean, printable geometry without mounting features
 - Support future Imperial hardware types through extensible architecture
-- Maintain backward compatibility with existing label designs
+- Ensure high contrast visibility with default white/black color scheme
 
-This specification ensures robust Imperial hardware label generation with user-friendly fractional interfaces and prevents common implementation pitfalls through clear architectural guidelines.
+This specification ensures robust Imperial hardware label generation with user-friendly fractional interfaces while maintaining a focused, single-label approach that prevents common implementation pitfalls through clear architectural guidelines.
