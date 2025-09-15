@@ -20,10 +20,10 @@ export_mode = "Complete"; // [Complete, Base only, Content only]
 /* [Typography] */
 font_family = "Roboto"; // [Arial, Roboto, Open Sans, Noto Sans, Liberation Sans]
 font_weight = "Bold"; // [Regular, Bold, Light, Medium]
-text_size = 3.0;
+text_size = 3.5;
 
 /* [Advanced Settings] */
-label_width = 11.5;
+label_width = 11.7;
 label_thickness = 0.8;
 corner_radius = 0.9;
 edge_chamfer = 0.2;
@@ -170,7 +170,7 @@ module label_content(type, thread, display_text, length_mm) {
 ////////////////////////////////////////////////////////
 
 module render_text(text_content) {
-    translate([0, -label_width/2 + 2, label_thickness]) {
+    translate([0, -label_width/2 + 3, label_thickness]) {
         linear_extrude(height = text_height) {
             text(text_content, 
                  size = text_size,
@@ -186,7 +186,7 @@ module render_text(text_content) {
 ////////////////////////////////////////////////////////
 
 module render_hardware_icon(type, length_mm) {
-    icon_y_pos = label_width/4-1;  // Position icon closer to edge and further from text
+    icon_y_pos = label_width/4-1;  // Position icon closer to center and further from text
     
     if (type == "Phillips head bolt") {
         phillips_bolt_icon(length_mm, icon_y_pos);
@@ -227,7 +227,7 @@ module render_hardware_icon(type, length_mm) {
 //              BOLT STEM HELPER                     //
 ////////////////////////////////////////////////////////
 
-module bolt_stem(length_mm, start_x, y_pos, stem_width = 2.5) {
+module bolt_stem(length_mm, start_x, y_pos, stem_width = 2.0) {
     effective_length = min(length_mm, max_bolt_length);
     z_pos = label_thickness;
     
@@ -260,20 +260,20 @@ module phillips_bolt_icon(length_mm, y_pos) {
     
     translate([head_x, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 5);
-            translate([-2, -0.4, 0]) cube([4, 0.8, text_height]);
-            translate([-0.4, -2, 0]) cube([0.8, 4, text_height]);
+            cylinder(h = text_height, d = 4);
+            translate([-1.5, -0.3, 0]) cube([3, 0.6, text_height]);
+            translate([-0.3, -1.5, 0]) cube([0.6, 3, text_height]);
         }
     }
     
-    translate([head_x + 3.5, y_pos, z_pos]) {
+    translate([head_x + 3, y_pos, z_pos]) {
         intersection() {
-            cylinder(h = text_height, d = 5);
-            translate([0, -2.5, 0]) cube([5, 5, text_height]);
+            cylinder(h = text_height, d = 4);
+            translate([0, -2, 0]) cube([4, 4, text_height]);
         }
     }
     
-    bolt_stem(length_mm, head_x + 6, y_pos);
+    bolt_stem(length_mm, head_x + 5, y_pos);
 }
 
 module phillips_countersunk_icon(length_mm, y_pos) {
@@ -282,19 +282,19 @@ module phillips_countersunk_icon(length_mm, y_pos) {
     
     translate([head_x, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 5);
-            translate([-2, -0.4, 0]) cube([4, 0.8, text_height]);
-            translate([-0.4, -2, 0]) cube([0.8, 4, text_height]);
+            cylinder(h = text_height, d = 4);
+            translate([-1.5, -0.3, 0]) cube([3, 0.6, text_height]);
+            translate([-0.3, -1.5, 0]) cube([0.6, 3, text_height]);
         }
     }
     
-    translate([head_x + 4, y_pos, z_pos]) {
+    translate([head_x + 3, y_pos, z_pos]) {
         linear_extrude(height = text_height) {
-            polygon(points = [[0, -2.5], [3, 0], [0, 2.5]]);
+            polygon(points = [[0, -2], [2.5, 0], [0, 2]]);
         }
     }
     
-    bolt_stem(length_mm, head_x + 5, y_pos);
+    bolt_stem(length_mm, head_x + 4, y_pos);
 }
 
 module phillips_wood_screw_icon(length_mm, y_pos) {
@@ -303,26 +303,26 @@ module phillips_wood_screw_icon(length_mm, y_pos) {
     
     translate([head_x, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 5);
-            translate([-2, -0.4, 0]) cube([4, 0.8, text_height]);
-            translate([-0.4, -2, 0]) cube([0.8, 4, text_height]);
+            cylinder(h = text_height, d = 4);
+            translate([-1.5, -0.3, 0]) cube([3, 0.6, text_height]);
+            translate([-0.3, -1.5, 0]) cube([0.6, 3, text_height]);
         }
     }
     
-    translate([head_x + 4, y_pos, z_pos]) {
+    translate([head_x + 3, y_pos, z_pos]) {
         linear_extrude(height = text_height) {
-            polygon(points = [[0, -2.5], [3, 0], [0, 2.5]]);
+            polygon(points = [[0, -2], [2.5, 0], [0, 2]]);
         }
     }
     
     stem_length = max(0, length_mm - 2);
     if (stem_length > 0) {
-        bolt_stem(stem_length, head_x + 5, y_pos);
+        bolt_stem(stem_length, head_x + 4, y_pos);
         
-        tip_x = head_x + 5 + min(stem_length, max_bolt_length);
+        tip_x = head_x + 4 + min(stem_length, max_bolt_length);
         translate([tip_x, y_pos, z_pos]) {
             linear_extrude(height = text_height) {
-                polygon(points = [[0, -1.25], [2, 0], [0, 1.25]]);
+                polygon(points = [[0, -1], [1.5, 0], [0, 1]]);
             }
         }
     }
@@ -338,16 +338,16 @@ module socket_bolt_icon(length_mm, y_pos) {
     
     translate([head_x, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 5);
-            cylinder(h = text_height, d = 3, $fn = 6);
+            cylinder(h = text_height, d = 4);
+            cylinder(h = text_height, d = 2.5, $fn = 6);
         }
     }
     
-    translate([head_x + 3.5, y_pos - 2.5, z_pos]) {
-        cube([4, 5, text_height]);
+    translate([head_x + 3, y_pos - 2, z_pos]) {
+        cube([3, 4, text_height]);
     }
     
-    bolt_stem(length_mm, head_x + 6, y_pos);
+    bolt_stem(length_mm, head_x + 5, y_pos);
 }
 
 module socket_countersunk_icon(length_mm, y_pos) {
@@ -356,18 +356,18 @@ module socket_countersunk_icon(length_mm, y_pos) {
     
     translate([head_x, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 5);
-            cylinder(h = text_height, d = 3, $fn = 6);
+            cylinder(h = text_height, d = 4);
+            cylinder(h = text_height, d = 2.5, $fn = 6);
         }
     }
     
-    translate([head_x + 4, y_pos, z_pos]) {
+    translate([head_x + 3, y_pos, z_pos]) {
         linear_extrude(height = text_height) {
-            polygon(points = [[0, -2.5], [3, 0], [0, 2.5]]);
+            polygon(points = [[0, -2], [2.5, 0], [0, 2]]);
         }
     }
     
-    bolt_stem(length_mm, head_x + 5, y_pos);
+    bolt_stem(length_mm, head_x + 4, y_pos);
 }
 
 ////////////////////////////////////////////////////////
@@ -379,14 +379,14 @@ module hex_bolt_icon(length_mm, y_pos) {
     z_pos = label_thickness;
     
     translate([head_x, y_pos, z_pos]) {
-        cylinder(h = text_height, d = 5, $fn = 6);
+        cylinder(h = text_height, d = 4, $fn = 6);
     }
     
-    translate([head_x + 3.5, y_pos - 2.5, z_pos]) {
-        cube([3, 5, text_height]);
+    translate([head_x + 3, y_pos - 2, z_pos]) {
+        cube([2.5, 4, text_height]);
     }
     
-    bolt_stem(length_mm, head_x + 5.5, y_pos);
+    bolt_stem(length_mm, head_x + 4.5, y_pos);
 }
 
 ////////////////////////////////////////////////////////
@@ -399,21 +399,21 @@ module button_bolt_icon(length_mm, y_pos) {
     
     translate([head_x, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 5);
-            cylinder(h = text_height, d = 3, $fn = 6);
+            cylinder(h = text_height, d = 4);
+            cylinder(h = text_height, d = 2.5, $fn = 6);
         }
     }
     
-    translate([head_x + 6, y_pos, z_pos]) {
+    translate([head_x + 5, y_pos, z_pos]) {
         linear_extrude(height = text_height) {
             intersection() {
-                circle(d = 5);
-                translate([-2.5, -2.5]) square([2.5, 5]);
+                circle(d = 4);
+                translate([-2, -2]) square([2, 4]);
             }
         }
     }
     
-    bolt_stem(length_mm, head_x + 6, y_pos);
+    bolt_stem(length_mm, head_x + 5, y_pos);
 }
 
 ////////////////////////////////////////////////////////
@@ -425,8 +425,8 @@ module torx_star(size) {
         rotate([0, 0, i * 60]) {
             translate([0, -size/2, 0]) {
                 hull() {
-                    circle(d = 0.3);
-                    translate([0, size, 0]) circle(d = 0.3);
+                    circle(d = 0.25);
+                    translate([0, size, 0]) circle(d = 0.25);
                 }
             }
         }
@@ -439,16 +439,16 @@ module torx_bolt_icon(length_mm, y_pos) {
     
     translate([head_x, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 5);
-            linear_extrude(height = text_height) torx_star(2.5);
+            cylinder(h = text_height, d = 4);
+            linear_extrude(height = text_height) torx_star(2);
         }
     }
     
-    translate([head_x + 3.5, y_pos - 2.5, z_pos]) {
-        cube([4, 5, text_height]);
+    translate([head_x + 3, y_pos - 2, z_pos]) {
+        cube([3, 4, text_height]);
     }
     
-    bolt_stem(length_mm, head_x + 6, y_pos);
+    bolt_stem(length_mm, head_x + 5, y_pos);
 }
 
 module torx_countersunk_icon(length_mm, y_pos) {
@@ -457,18 +457,18 @@ module torx_countersunk_icon(length_mm, y_pos) {
     
     translate([head_x, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 5);
-            linear_extrude(height = text_height) torx_star(2.5);
+            cylinder(h = text_height, d = 4);
+            linear_extrude(height = text_height) torx_star(2);
         }
     }
     
-    translate([head_x + 4, y_pos, z_pos]) {
+    translate([head_x + 3, y_pos, z_pos]) {
         linear_extrude(height = text_height) {
-            polygon(points = [[0, -2.5], [3, 0], [0, 2.5]]);
+            polygon(points = [[0, -2], [2.5, 0], [0, 2]]);
         }
     }
     
-    bolt_stem(length_mm, head_x + 5, y_pos);
+    bolt_stem(length_mm, head_x + 4, y_pos);
 }
 
 module torx_wood_screw_icon(length_mm, y_pos) {
@@ -477,25 +477,25 @@ module torx_wood_screw_icon(length_mm, y_pos) {
     
     translate([head_x, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 5);
-            linear_extrude(height = text_height) torx_star(2.5);
+            cylinder(h = text_height, d = 4);
+            linear_extrude(height = text_height) torx_star(2);
         }
     }
     
-    translate([head_x + 4, y_pos, z_pos]) {
+    translate([head_x + 3, y_pos, z_pos]) {
         linear_extrude(height = text_height) {
-            polygon(points = [[0, -2.5], [3, 0], [0, 2.5]]);
+            polygon(points = [[0, -2], [2.5, 0], [0, 2]]);
         }
     }
     
     stem_length = max(0, length_mm - 2);
     if (stem_length > 0) {
-        bolt_stem(stem_length, head_x + 5, y_pos);
+        bolt_stem(stem_length, head_x + 4, y_pos);
         
-        tip_x = head_x + 5 + min(stem_length, max_bolt_length);
+        tip_x = head_x + 4 + min(stem_length, max_bolt_length);
         translate([tip_x, y_pos, z_pos]) {
             linear_extrude(height = text_height) {
-                polygon(points = [[0, -1.25], [2, 0], [0, 1.25]]);
+                polygon(points = [[0, -1], [1.5, 0], [0, 1]]);
             }
         }
     }
@@ -510,16 +510,16 @@ module wall_anchor_icon(length_mm, y_pos) {
     start_x = -min(length_mm, max_bolt_length)/2 - 4;
     
     for (i = [0:4]) {
-        translate([start_x + i * 2, y_pos, z_pos]) {
+        translate([start_x + i * 1.5, y_pos, z_pos]) {
             linear_extrude(height = text_height) {
-                polygon(points = [[-1, -2], [1, -1.5], [1, 1.5], [-1, 2]]);
+                polygon(points = [[-0.75, -1.5], [0.75, -1.25], [0.75, 1.25], [-0.75, 1.5]]);
             }
         }
     }
     
-    if (length_mm > 8) {
-        translate([start_x + 8, y_pos - 1.5, z_pos]) {
-            cube([min(length_mm - 8, max_bolt_length - 8), 3, text_height]);
+    if (length_mm > 6) {
+        translate([start_x + 6, y_pos - 1.25, z_pos]) {
+            cube([min(length_mm - 6, max_bolt_length - 6), 2.5, text_height]);
         }
     }
 }
@@ -528,16 +528,16 @@ module heat_insert_icon(length_mm, y_pos) {
     z_pos = label_thickness;
     center_x = 0;
     
-    translate([center_x - 2, y_pos, z_pos]) {
+    translate([center_x - 1.5, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 4);
-            cylinder(h = text_height, d = 2.5);
+            cylinder(h = text_height, d = 3);
+            cylinder(h = text_height, d = 2);
         }
     }
     
-    for (i = [0:3]) {
-        translate([center_x + 2 + i * 2, y_pos - 2, z_pos]) {
-            cube([1, 4, text_height]);
+    for (i = [0:2]) {
+        translate([center_x + 1.5 + i * 1.5, y_pos - 1.5, z_pos]) {
+            cube([0.75, 3, text_height]);
         }
     }
 }
@@ -550,15 +550,15 @@ module standard_nut_icon(y_pos) {
     z_pos = label_thickness;
     center_x = 0;
     
-    translate([center_x - 2, y_pos, z_pos]) {
+    translate([center_x - 1.5, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 5, $fn = 6);
-            cylinder(h = text_height, d = 3);
+            cylinder(h = text_height, d = 4, $fn = 6);
+            cylinder(h = text_height, d = 2.5);
         }
     }
     
-    translate([center_x + 2, y_pos - 2.5, z_pos]) {
-        cube([3, 5, text_height]);
+    translate([center_x + 1.5, y_pos - 2, z_pos]) {
+        cube([2.5, 4, text_height]);
     }
 }
 
@@ -566,18 +566,18 @@ module lock_nut_icon(y_pos) {
     z_pos = label_thickness;
     center_x = 0;
     
-    translate([center_x - 2, y_pos, z_pos]) {
+    translate([center_x - 1.5, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 5, $fn = 6);
-            cylinder(h = text_height, d = 3);
+            cylinder(h = text_height, d = 4, $fn = 6);
+            cylinder(h = text_height, d = 2.5);
         }
     }
     
-    translate([center_x + 2, y_pos - 2.5, z_pos]) {
-        cube([3, 5, text_height]);
+    translate([center_x + 1.5, y_pos - 2, z_pos]) {
+        cube([2.5, 4, text_height]);
     }
-    translate([center_x + 2, y_pos - 2, z_pos]) {
-        cube([4, 4, text_height]);
+    translate([center_x + 1.5, y_pos - 1.5, z_pos]) {
+        cube([3, 3, text_height]);
     }
 }
 
@@ -587,13 +587,13 @@ module standard_washer_icon(y_pos) {
     
     translate([center_x - 1, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 5);
-            cylinder(h = text_height, d = 3);
+            cylinder(h = text_height, d = 4);
+            cylinder(h = text_height, d = 2.5);
         }
     }
     
-    translate([center_x + 2, y_pos - 2.5, z_pos]) {
-        cube([1, 5, text_height]);
+    translate([center_x + 1.5, y_pos - 2, z_pos]) {
+        cube([0.75, 4, text_height]);
     }
 }
 
@@ -603,13 +603,13 @@ module spring_washer_icon(y_pos) {
     
     translate([center_x - 1, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 5);
-            cylinder(h = text_height, d = 3);
-            translate([0, -0.4, 0]) cube([5, 0.8, text_height]);
+            cylinder(h = text_height, d = 4);
+            cylinder(h = text_height, d = 2.5);
+            translate([0, -0.3, 0]) cube([4, 0.6, text_height]);
         }
     }
     
-    translate([center_x + 2, y_pos - 2.5, z_pos]) {
-        cube([1, 5, text_height]);
+    translate([center_x + 1.5, y_pos - 2, z_pos]) {
+        cube([0.75, 4, text_height]);
     }
 }
