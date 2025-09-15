@@ -6,13 +6,13 @@
 
 /* [Single Label Mode] */
 hardware_type = "Button head bolt"; // [Phillips head bolt, Socket head bolt, Hex head bolt, Button head bolt, Torx head bolt, Phillips head countersunk, Torx head countersunk, Socket head countersunk, Phillips wood screw, Torx wood screw, Wall anchor, Heat set insert, Standard nut, Lock nut, Standard washer, Spring washer, Custom text, None]
-thread_spec = "#4-40"; // [#4-40, #5-40, #6-32, #8-32, #10-24, #12-24, #4-48, #5-44, #6-40, #8-36, #10-32, #12-28, 1/4-20, 5/16-18, 3/8-16, 7/16-14, 1/2-13, 9/16-12, 5/8-11, 3/4-10, 7/8-9, 1-8, 1/4-28, 5/16-24, 3/8-24, 7/16-20, 1/2-20, 9/16-18, 5/8-18, 3/4-16, 7/8-14, 1-12]
+thread_spec = "#4-40"; // [#4-40, #4-48, #5-40, #5-44, #6-32, #6-40, #8-32, #8-36, #10-24, #10-32, #12-24, #12-28, 1/4-20, 1/4-28, 5/16-18, 5/16-24, 3/8-16, 3/8-24, 7/16-14, 7/16-20, 1/2-13, 1/2-20, 9/16-12, 9/16-18, 5/8-11, 5/8-18, 3/4-10, 3/4-16, 7/8-9, 7/8-14, 1-8, 1-12]
 length_fraction = "3/4"; // [3/8, 1/2, 5/8, 3/4, 7/8, 1, 1-1/8, 1-1/4, 1-3/8, 1-1/2, 1-5/8, 1-3/4, 1-7/8, 2, 2-1/4, 2-1/2, 2-3/4, 3, 3-1/4, 3-1/2, 3-3/4, 4, 4-1/4, 4-1/2, 4-3/4, 5, 5-1/4, 5-1/2, 5-3/4, 6, 6-1/4, 6-1/2, 6-3/4, 7, 7-1/4, 7-1/2, 7-3/4, 8]
 custom_display_text = ""; // Custom text override (leave blank for auto-generation)
 custom_text_only = "Custom"; // Used only when hardware_type is "Custom text"
 
 /* [Label Properties] */
-label_units = 1; // [1:Small (35.8mm), 2:Medium (77.8mm), 3:Large (119.8mm)]
+label_units = 1; // [1:Small (37.8mm), 2:Medium (75.6mm), 3:Large (113.4mm)]
 base_color = "#FFFFFF"; // Base label color
 content_color = "#000000"; // Text and icon color
 export_mode = "Complete"; // [Complete, Base only, Content only]
@@ -20,22 +20,21 @@ export_mode = "Complete"; // [Complete, Base only, Content only]
 /* [Typography] */
 font_family = "Roboto"; // [Arial, Roboto, Open Sans, Noto Sans, Liberation Sans]
 font_weight = "Bold"; // [Regular, Bold, Light, Medium]
-text_size = 4.0;
-text_mode = "Raised"; // [Raised, Flush]
+text_size = 3.0;
 
 /* [Advanced Settings] */
 label_width = 11.5;
 label_thickness = 0.8;
 corner_radius = 0.9;
 edge_chamfer = 0.2;
-raised_height = 0.2;
-flush_height = 0.01;
+raised_height = 0.3;
 
 // Internal calculations
-label_length = (label_units == 1) ? 35.8 : (label_units == 2) ? 77.8 : 119.8;
-text_height = (text_mode == "Raised") ? raised_height : flush_height;
+label_length = (label_units == 1) ? 37.8 : (label_units == 2) ? 75.6 : 113.4;
+text_height = raised_height;
 font_string = str(font_family, ":style=", font_weight);
 max_bolt_length = 20 * label_units;
+max_text_width = label_length - 4; // Leave 2mm margin on each side for text
 
 // Convert fraction string to decimal inches
 length_inches = fraction_to_decimal(length_fraction);
@@ -187,7 +186,7 @@ module render_text(text_content) {
 ////////////////////////////////////////////////////////
 
 module render_hardware_icon(type, length_mm) {
-    icon_y_pos = label_width/4;
+    icon_y_pos = label_width/4-1;  // Position icon closer to edge and further from text
     
     if (type == "Phillips head bolt") {
         phillips_bolt_icon(length_mm, icon_y_pos);
