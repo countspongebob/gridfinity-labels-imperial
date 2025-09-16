@@ -304,10 +304,12 @@ module phillips_bolt_icon(length_mm, y_pos) {
         }
     }
     
-    translate([head_x + 3, y_pos, z_pos]) {
-        intersection() {
-            cylinder(h = text_height, d = 4);
-            translate([0, -2, 0]) cube([4, 4, text_height]);
+    translate([head_x + 5, y_pos, z_pos]) {
+        linear_extrude(height = text_height) {
+            intersection() {
+                circle(d = 4);
+                translate([-2, -2]) square([2, 4]);
+            }
         }
     }
     
