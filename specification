@@ -54,7 +54,18 @@ A parametric OpenSCAD-based system for generating customizable 3D printable sing
 - Standard nuts, Lock nuts
 - Standard washers, Spring washers
 
-### 5. Single Label Generation Only
+### 5. Batch All Sizes Generation
+**Scope**: System can generate complete sets of labels for one hardware type and thread specification across all available lengths
+- **Interface**: Toggle to enable batch mode with separate hardware type and thread specification dropdowns
+- **Responsive Grid Layout**: Column count adapts to label size to optimize print bed usage
+  - Small labels (37.8mm): 6 columns
+  - Medium labels (75.6mm): 3 columns  
+  - Large labels (113.4mm): 2 columns
+- **Spacing**: Minimal 1mm gaps between labels to reduce material waste
+- **Coverage**: Automatically generates all 29 fractional lengths (1/4" through 2" in 1/16" increments)
+- **Use Case**: Perfect for creating complete label sets for commonly used fastener types (e.g., all sizes of #4-40 Phillips bolts)
+
+### 6. Single Label Generation Only
 **Scope**: System generates one label at a time based on user selections
 - **No batch processing**: Multi-label generation functionality removed
 - **Focused interface**: Single hardware type, thread, and length selection
