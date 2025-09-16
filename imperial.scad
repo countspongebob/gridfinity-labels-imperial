@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////
 //        Parts Bin Label Generator - IMPERIAL        //
 //         Fractional & Machine Screw Support         //
-//            Version 16 - Single Label Only          //
+//            Version 16 - Batch All Sizes            //
 ////////////////////////////////////////////////////////
 
 /* [Single Label Mode] */
@@ -10,6 +10,11 @@ thread_spec = "#4-40"; // [#4-40, #4-48, #5-40, #5-44, #6-32, #6-40, #8-32, #8-3
 length_fraction = "3/4"; // [1/4, 5/16, 3/8, 7/16, 1/2, 9/16, 5/8, 11/16, 3/4, 13/16, 7/8, 15/16, 1, 1-1/16, 1-1/8, 1-3/16, 1-1/4, 1-5/16, 1-3/8, 1-7/16, 1-1/2, 1-9/16, 1-5/8, 1-11/16, 1-3/4, 1-13/16, 1-7/8, 1-15/16, 2]
 custom_display_text = ""; // Custom text override (leave blank for auto-generation)
 custom_text_only = "Custom"; // Used only when hardware_type is "Custom text"
+
+/* [Batch All Sizes Mode] */
+enable_batch_all_sizes = false;
+batch_hardware_type = "Phillips head bolt"; // [Phillips head bolt, Socket head bolt, Hex head bolt, Button head bolt, Torx head bolt, Phillips head countersunk, Torx head countersunk, Socket head countersunk, Phillips wood screw, Torx wood screw, Wall anchor, Heat set insert, Standard nut, Lock nut, Standard washer, Spring washer]
+batch_thread_spec = "#4-40"; // [#4-40, #4-48, #5-40, #5-44, #6-32, #6-40, #8-32, #8-36, #10-24, #10-32, #12-24, #12-28, 1/4-20, 1/4-28, 5/16-18, 5/16-24, 3/8-16, 3/8-24, 7/16-14, 7/16-20, 1/2-13, 1/2-20, 9/16-12, 9/16-18, 5/8-11, 5/8-18, 3/4-10, 3/4-16, 7/8-9, 7/8-14, 1-8, 1-12]
 
 /* [Label Properties] */
 label_units = 1; // [1:Small (37.8mm), 2:Medium (75.6mm), 3:Large (113.4mm)]
@@ -36,9 +41,13 @@ font_string = str(font_family, ":style=", font_weight);
 max_bolt_length = 20 * label_units;
 max_text_width = label_length - 4; // Leave 2mm margin on each side for text
 
-// Convert fraction string to decimal inches
-length_inches = fraction_to_decimal(length_fraction);
-length_mm = length_inches * 25.4; // Convert to mm for internal calculations
+// Batch spacing calculations
+grid_columns = (label_units == 1) ? 6 : (label_units == 2) ? 3 : 2;
+h_spacing = label_length + 1; // 1mm gap between labels horizontally
+v_spacing = label_width + 1;  // 1mm gap between labels vertically
+
+// All fractional sizes for batch generation
+all_fractional_sizes = ["1/4", "5/16", "3/8", "7/16", "1/2", "9/16", "5/8", "11/16", "3/4", "13/16", "7/8", "15/16", "1", "1-1/16", "1-1/8", "1-3/16", "1-1/4", "1-5/16", "1-3/8", "1-7/16", "1-1/2", "1-9/16", "1-5/8", "1-11/16", "1-3/4", "1-13/16", "1-7/8", "1-15/16", "2"];
 
 ////////////////////////////////////////////////////////
 //         IMPERIAL SYSTEM FUNCTIONS                 //
@@ -89,17 +98,56 @@ function is_nut_or_washer_type(type) =
 //                 MAIN EXECUTION                    //
 ////////////////////////////////////////////////////////
 
-// Generate display text if not provided
-final_display_text = (custom_display_text != "") ? custom_display_text :
-    is_nut_or_washer_type(hardware_type) ? "" :
-    str(thread_spec, " x ", length_fraction);
+if (enable_batch_all_sizes) {
+    generate_batch_all_sizes();
+} else {
+    // Single label mode
+    length_inches = fraction_to_decimal(length_fraction);
+    length_mm = length_inches * 25.4;
+    
+    final_display_text = (custom_display_text != "") ? custom_display_text :
+        is_nut_or_washer_type(hardware_type) ? "" :
+        str(thread_spec, " x ", length_fraction);
 
-create_single_label(
-    type = hardware_type,
-    thread = thread_spec,
-    display_text = final_display_text,
-    length_mm = length_mm
-);
+    create_single_label(
+        type = hardware_type,
+        thread = thread_spec,
+        display_text = final_display_text,
+        length_mm = length_mm
+    );
+}
+
+////////////////////////////////////////////////////////
+//            BATCH ALL SIZES GENERATION             //
+////////////////////////////////////////////////////////
+
+module generate_batch_all_sizes() {
+    num_sizes = len(all_fractional_sizes);
+    
+    for (i = [0 : num_sizes - 1]) {
+        size_fraction = all_fractional_sizes[i];
+        length_inches = fraction_to_decimal(size_fraction);
+        length_mm = length_inches * 25.4;
+        
+        // Calculate grid position
+        row = floor(i / grid_columns);
+        col = i % grid_columns;
+        
+        // Position label in grid with tight spacing
+        translate([col * h_spacing, -row * v_spacing, 0]) {
+            // Generate display text - use batch parameters, not defaults
+            final_display_text = is_nut_or_washer_type(batch_hardware_type) ? "" :
+                str(batch_thread_spec, " x ", size_fraction);
+                
+            create_single_label(
+                type = batch_hardware_type,
+                thread = batch_thread_spec,
+                display_text = final_display_text,
+                length_mm = length_mm
+            );
+        }
+    }
+}
 
 ////////////////////////////////////////////////////////
 //              SINGLE LABEL CREATION                //
@@ -151,8 +199,7 @@ module label_content(type, thread, display_text, length_mm) {
     } else {
         // Bolts and screws
         render_hardware_icon(type, length_mm);
-        final_text = (custom_display_text != "") ? custom_display_text : str(thread_spec, " x ", length_fraction);
-        render_text(final_text);
+        render_text(display_text);
     }
 }
 
