@@ -7,7 +7,7 @@
 /* [Single Label Mode] */
 hardware_type = "Button head bolt"; // [Phillips head bolt, Socket head bolt, Hex head bolt, Button head bolt, Torx head bolt, Phillips head countersunk, Torx head countersunk, Socket head countersunk, Phillips wood screw, Torx wood screw, Wall anchor, Heat set insert, Standard nut, Lock nut, Standard washer, Spring washer, Custom text, None]
 thread_spec = "#4-40"; // [#4-40, #4-48, #5-40, #5-44, #6-32, #6-40, #8-32, #8-36, #10-24, #10-32, #12-24, #12-28, 1/4-20, 1/4-28, 5/16-18, 5/16-24, 3/8-16, 3/8-24, 7/16-14, 7/16-20, 1/2-13, 1/2-20, 9/16-12, 9/16-18, 5/8-11, 5/8-18, 3/4-10, 3/4-16, 7/8-9, 7/8-14, 1-8, 1-12]
-length_fraction = "3/4"; // [3/8, 1/2, 5/8, 3/4, 7/8, 1, 1-1/8, 1-1/4, 1-3/8, 1-1/2, 1-5/8, 1-3/4, 1-7/8, 2, 2-1/4, 2-1/2, 2-3/4, 3, 3-1/4, 3-1/2, 3-3/4, 4, 4-1/4, 4-1/2, 4-3/4, 5, 5-1/4, 5-1/2, 5-3/4, 6, 6-1/4, 6-1/2, 6-3/4, 7, 7-1/4, 7-1/2, 7-3/4, 8]
+length_fraction = "3/4"; // [1/4, 5/16, 3/8, 7/16, 1/2, 9/16, 5/8, 11/16, 3/4, 13/16, 7/8, 15/16, 1, 1-1/16, 1-1/8, 1-3/16, 1-1/4, 1-5/16, 1-3/8, 1-7/16, 1-1/2, 1-9/16, 1-5/8, 1-11/16, 1-3/4, 1-13/16, 1-7/8, 1-15/16, 2]
 custom_display_text = ""; // Custom text override (leave blank for auto-generation)
 custom_text_only = "Custom"; // Used only when hardware_type is "Custom text"
 
@@ -48,44 +48,35 @@ function imperial_to_mm(inches) = inches * 25.4;
 
 // Convert fractional string to decimal
 function fraction_to_decimal(frac_str) =
+    (frac_str == "1/4") ? 0.25 :
+    (frac_str == "5/16") ? 0.3125 :
     (frac_str == "3/8") ? 0.375 :
+    (frac_str == "7/16") ? 0.4375 :
     (frac_str == "1/2") ? 0.5 :
+    (frac_str == "9/16") ? 0.5625 :
     (frac_str == "5/8") ? 0.625 :
+    (frac_str == "11/16") ? 0.6875 :
     (frac_str == "3/4") ? 0.75 :
+    (frac_str == "13/16") ? 0.8125 :
     (frac_str == "7/8") ? 0.875 :
+    (frac_str == "15/16") ? 0.9375 :
     (frac_str == "1") ? 1.0 :
+    (frac_str == "1-1/16") ? 1.0625 :
     (frac_str == "1-1/8") ? 1.125 :
+    (frac_str == "1-3/16") ? 1.1875 :
     (frac_str == "1-1/4") ? 1.25 :
+    (frac_str == "1-5/16") ? 1.3125 :
     (frac_str == "1-3/8") ? 1.375 :
+    (frac_str == "1-7/16") ? 1.4375 :
     (frac_str == "1-1/2") ? 1.5 :
+    (frac_str == "1-9/16") ? 1.5625 :
     (frac_str == "1-5/8") ? 1.625 :
+    (frac_str == "1-11/16") ? 1.6875 :
     (frac_str == "1-3/4") ? 1.75 :
+    (frac_str == "1-13/16") ? 1.8125 :
     (frac_str == "1-7/8") ? 1.875 :
+    (frac_str == "1-15/16") ? 1.9375 :
     (frac_str == "2") ? 2.0 :
-    (frac_str == "2-1/4") ? 2.25 :
-    (frac_str == "2-1/2") ? 2.5 :
-    (frac_str == "2-3/4") ? 2.75 :
-    (frac_str == "3") ? 3.0 :
-    (frac_str == "3-1/4") ? 3.25 :
-    (frac_str == "3-1/2") ? 3.5 :
-    (frac_str == "3-3/4") ? 3.75 :
-    (frac_str == "4") ? 4.0 :
-    (frac_str == "4-1/4") ? 4.25 :
-    (frac_str == "4-1/2") ? 4.5 :
-    (frac_str == "4-3/4") ? 4.75 :
-    (frac_str == "5") ? 5.0 :
-    (frac_str == "5-1/4") ? 5.25 :
-    (frac_str == "5-1/2") ? 5.5 :
-    (frac_str == "5-3/4") ? 5.75 :
-    (frac_str == "6") ? 6.0 :
-    (frac_str == "6-1/4") ? 6.25 :
-    (frac_str == "6-1/2") ? 6.5 :
-    (frac_str == "6-3/4") ? 6.75 :
-    (frac_str == "7") ? 7.0 :
-    (frac_str == "7-1/4") ? 7.25 :
-    (frac_str == "7-1/2") ? 7.5 :
-    (frac_str == "7-3/4") ? 7.75 :
-    (frac_str == "8") ? 8.0 :
     0.75; // Default fallback
 
 function is_nut_or_washer_type(type) =
