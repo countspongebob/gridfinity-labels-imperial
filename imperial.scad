@@ -105,8 +105,9 @@ if (enable_batch_all_sizes) {
     length_inches = fraction_to_decimal(length_fraction);
     length_mm = length_inches * 25.4;
     
+    // FIXED: Now properly handles custom text for nuts/washers
     final_display_text = (custom_display_text != "") ? custom_display_text :
-        is_nut_or_washer_type(hardware_type) ? "" :
+        is_nut_or_washer_type(hardware_type) ? thread_spec :  // Changed from "" to thread_spec
         str(thread_spec, " x ", length_fraction);
 
     create_single_label(
@@ -136,7 +137,8 @@ module generate_batch_all_sizes() {
         // Position label in grid with tight spacing
         translate([col * h_spacing, -row * v_spacing, 0]) {
             // Generate display text - use batch parameters, not defaults
-            final_display_text = is_nut_or_washer_type(batch_hardware_type) ? "" :
+            // FIXED: Also updated batch mode to use thread_spec for nuts/washers
+            final_display_text = is_nut_or_washer_type(batch_hardware_type) ? batch_thread_spec :
                 str(batch_thread_spec, " x ", size_fraction);
                 
             create_single_label(
@@ -195,7 +197,8 @@ module label_content(type, thread, display_text, length_mm) {
         render_text(custom_text_only);
     } else if (is_nut_or_washer_type(type)) {
         render_hardware_icon(type, length_mm);
-        render_text(thread);
+        // FIXED: Now uses display_text instead of thread
+        render_text(display_text);
     } else {
         // Bolts and screws
         render_hardware_icon(type, length_mm);
@@ -296,21 +299,18 @@ module phillips_bolt_icon(length_mm, y_pos) {
     head_x = -min(length_mm, max_bolt_length)/2 - 3;
     z_pos = label_thickness;
     
+    // Top view - round head with Phillips cross
     translate([head_x, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 4);
+            cylinder(h = text_height, d = 4, $fn = 32);  // Round head
             translate([-1.5, -0.3, 0]) cube([3, 0.6, text_height]);
             translate([-0.3, -1.5, 0]) cube([0.6, 3, text_height]);
         }
     }
     
-    translate([head_x + 5, y_pos, z_pos]) {
-        linear_extrude(height = text_height) {
-            intersection() {
-                circle(d = 4);
-                translate([-2, -2]) square([2, 4]);
-            }
-        }
+    // Side view - cylindrical head
+    translate([head_x + 3, y_pos - 2, z_pos]) {
+        cube([2, 4, text_height]);
     }
     
     bolt_stem(length_mm, head_x + 5, y_pos);
@@ -320,14 +320,16 @@ module phillips_countersunk_icon(length_mm, y_pos) {
     head_x = -min(length_mm, max_bolt_length)/2 - 2;
     z_pos = label_thickness;
     
+    // Top view - round head with Phillips cross
     translate([head_x, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 4);
+            cylinder(h = text_height, d = 4, $fn = 32);  // Round head
             translate([-1.5, -0.3, 0]) cube([3, 0.6, text_height]);
             translate([-0.3, -1.5, 0]) cube([0.6, 3, text_height]);
         }
     }
     
+    // Side view - angled countersunk profile
     translate([head_x + 3, y_pos, z_pos]) {
         linear_extrude(height = text_height) {
             polygon(points = [[0, -2], [2.5, 0], [0, 2]]);
@@ -376,13 +378,15 @@ module socket_bolt_icon(length_mm, y_pos) {
     head_x = -min(length_mm, max_bolt_length)/2 - 3;
     z_pos = label_thickness;
     
+    // Top view - round head with hex socket
     translate([head_x, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 4);
-            cylinder(h = text_height, d = 2.5, $fn = 6);
+            cylinder(h = text_height, d = 4, $fn = 32);  // Round head
+            cylinder(h = text_height, d = 2.5, $fn = 6);  // Hex socket
         }
     }
     
+    // Side view - cylindrical head
     translate([head_x + 3, y_pos - 2, z_pos]) {
         cube([3, 4, text_height]);
     }
@@ -437,18 +441,20 @@ module button_bolt_icon(length_mm, y_pos) {
     head_x = -min(length_mm, max_bolt_length)/2 - 3;
     z_pos = label_thickness;
     
+    // Top view - round head with hex socket
     translate([head_x, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 4);
-            cylinder(h = text_height, d = 2.5, $fn = 6);
+            cylinder(h = text_height, d = 4, $fn = 32);  // Round head
+            cylinder(h = text_height, d = 2.5, $fn = 6);  // Hex socket
         }
     }
     
-    translate([head_x + 5, y_pos, z_pos]) {
+    // Side view - rounded/domed profile for button head
+    translate([head_x + 3, y_pos, z_pos]) {
         linear_extrude(height = text_height) {
             intersection() {
-                circle(d = 4);
-                translate([-2, -2]) square([2, 4]);
+                circle(d = 4, $fn = 32);
+                translate([0, -2]) square([2, 4]);
             }
         }
     }
@@ -477,13 +483,15 @@ module torx_bolt_icon(length_mm, y_pos) {
     head_x = -min(length_mm, max_bolt_length)/2 - 3;
     z_pos = label_thickness;
     
+    // Top view - round head with Torx star socket
     translate([head_x, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 4);
-            linear_extrude(height = text_height) torx_star(2);
+            cylinder(h = text_height, d = 4, $fn = 32);  // Round head
+            linear_extrude(height = text_height) torx_star(2);  // Torx star socket
         }
     }
     
+    // Side view - cylindrical head
     translate([head_x + 3, y_pos - 2, z_pos]) {
         cube([3, 4, text_height]);
     }
@@ -590,13 +598,15 @@ module standard_nut_icon(y_pos) {
     z_pos = label_thickness;
     center_x = 0;
     
+    // Top view - hex outside, smooth circular hole inside
     translate([center_x - 1.5, y_pos, z_pos]) {
         difference() {
             cylinder(h = text_height, d = 4, $fn = 6);
-            cylinder(h = text_height, d = 2.5);
+            cylinder(h = text_height, d = 2.5, $fn = 32);  // Smooth circular hole
         }
     }
     
+    // Side view - simple rectangular profile
     translate([center_x + 1.5, y_pos - 2, z_pos]) {
         cube([2.5, 4, text_height]);
     }
@@ -606,18 +616,25 @@ module lock_nut_icon(y_pos) {
     z_pos = label_thickness;
     center_x = 0;
     
+    // Top view - hex outside, smooth circular hole inside
     translate([center_x - 1.5, y_pos, z_pos]) {
         difference() {
             cylinder(h = text_height, d = 4, $fn = 6);
-            cylinder(h = text_height, d = 2.5);
+            cylinder(h = text_height, d = 2.5, $fn = 32);  // Smooth circular hole
         }
     }
     
+    // Side view - slightly taller with rounded/domed top
     translate([center_x + 1.5, y_pos - 2, z_pos]) {
         cube([2.5, 4, text_height]);
     }
-    translate([center_x + 1.5, y_pos - 1.5, z_pos]) {
-        cube([3, 3, text_height]);
+    translate([center_x + 1.5, y_pos, z_pos]) {
+        linear_extrude(height = text_height) {
+            intersection() {
+                circle(d = 4, $fn = 32);
+                translate([0, -2]) square([3, 4]);
+            }
+        }
     }
 }
 
@@ -625,15 +642,12 @@ module standard_washer_icon(y_pos) {
     z_pos = label_thickness;
     center_x = 0;
     
-    translate([center_x - 1, y_pos, z_pos]) {
+    // Simple ring shape - just a circle with a hole
+    translate([center_x, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 4);
+            cylinder(h = text_height, d = 5);
             cylinder(h = text_height, d = 2.5);
         }
-    }
-    
-    translate([center_x + 1.5, y_pos - 2, z_pos]) {
-        cube([0.75, 4, text_height]);
     }
 }
 
