@@ -45,7 +45,7 @@ A parametric OpenSCAD-based system for generating customizable 3D printable sing
 
 ### 4. Hardware Component Types
 **Bolts & Screws**:
-- Phillips head bolt, Socket head bolt, Hex head bolt, Button head bolt, Torx head bolt
+- Phillips head screw, Socket head bolt, Hex head bolt, Button head screw, Torx head bolt
 - Phillips/Torx/Socket head countersunk
 - Phillips/Torx wood screws
 - Wall anchors, Heat set inserts
@@ -100,9 +100,9 @@ display_text = str(thread_spec, " x ", length_fraction)
 
 **Top View Icons (Looking down on head)**:
 - **Round Heads** (smooth circular outline, $fn=32):
-  - Phillips head bolt: Round with cross slots
+  - Phillips head screw: Round with cross slots
   - Socket head bolt: Round with hexagonal socket
-  - Button head bolt: Round with hexagonal socket
+  - Button head screw: Round with hexagonal socket
   - Torx head bolt: Round with star socket
   - All countersunk variants: Round with respective drive pattern
   - Wood screws: Round with drive pattern
@@ -113,8 +113,8 @@ display_text = str(thread_spec, " x ", length_fraction)
   - Lock nut: Hexagonal with smooth circular hole ($fn=32 for hole)
 
 - **Special Icons**:
-  - Standard washer: Simple ring (circle with circular hole)
-  - Spring washer: Split ring (gap indicating spring action)
+  - Standard washer: Simple ring (smooth circles inside and out, $fn=32)
+  - Spring washer: Split ring (smooth circles with gap, $fn=32)
   - Wall anchor: Expansion pattern
   - Heat set insert: Knurled pattern indication
 
@@ -228,15 +228,18 @@ label_content(type, thread, display_text, length_mm) // Handles all content rend
 - Font: Roboto Bold, size 3.5
 - Thread: #4-40 (most common machine screw)
 - Length: 3/4" (common fastener length)
-- Hardware type: Button head bolt
+- Hardware type: Button head screw
 
 ### 13. Version Control
 **v16.1 Bug Fixes and Enhancements**:
 - Fixed custom_display_text to work properly with nuts and washers
-- Corrected standard washer icon (removed hex artifact, now simple ring)
+- Corrected standard washer icon (simple ring with smooth circles, restored side view)
+- Fixed spring washer icon (smooth circular rings inside and out)
 - Fixed nut icons to have smooth circular holes ($fn=32)
 - Corrected all round-head bolts to display circular tops ($fn=32)
 - Updated lock nut side profile to show rounded/domed top
+- Changed "Phillips head bolt" to "Phillips head screw" in interface
+- Changed "Button head bolt" to "Button head screw" in interface
 - Ensured proper icon geometry for all hardware types
 - Enhanced display_text parameter flow through all rendering functions
 
