@@ -1,4 +1,4 @@
-# 3D Printable Parts Bin Label Generator - IMPERIAL SPECIFICATION v16
+# 3D Printable Parts Bin Label Generator - IMPERIAL SPECIFICATION v16.1
 
 ## Overview
 A parametric OpenSCAD-based system for generating customizable 3D printable single labels for parts storage bins. This specification covers Imperial hardware (machine screws #4-40 through 1"-12) with dual-color 3D printing support and fractional length dropdown interface.
@@ -6,8 +6,8 @@ A parametric OpenSCAD-based system for generating customizable 3D printable sing
 ## Core Requirements
 
 ### 1. Label Physical Specifications
-- **Base Dimensions**: Configurable length based on units (1-3 units: 35.8mm, 77.8mm, 119.8mm), fixed width 11.5mm
-- **Height**: 0.8mm base with 0.2mm raised text/icons (or 0.01mm flush text)
+- **Base Dimensions**: Configurable length based on units (1-3 units: 37.8mm, 75.6mm, 113.4mm), fixed width 11.7mm
+- **Height**: 0.8mm base with 0.3mm raised text/icons (or 0.01mm flush text)
 - **Material**: Single or dual-color 3D printing support
 - **Mounting**: Clean solid base with no holes or attachment points
 - **Edge Treatment**: Rounded corners with configurable radius (default 0.9mm) and chamfered top/bottom edges (default 0.2mm)
@@ -65,12 +65,6 @@ A parametric OpenSCAD-based system for generating customizable 3D printable sing
 - **Coverage**: Automatically generates all 29 fractional lengths (1/4" through 2" in 1/16" increments)
 - **Use Case**: Perfect for creating complete label sets for commonly used fastener types (e.g., all sizes of #4-40 Phillips bolts)
 
-### 6. Single Label Generation Only
-**Scope**: System generates one label at a time based on user selections
-- **No batch processing**: Multi-label generation functionality removed
-- **Focused interface**: Single hardware type, thread, and length selection
-- **Simplified workflow**: Direct parameter selection without parsing
-
 ### 6. Display Text Generation
 **CRITICAL REQUIREMENT**: Single source of truth for display text generation to prevent inconsistencies.
 
@@ -80,6 +74,12 @@ display_text = str(thread_spec, " x ", length_fraction)
 // Example: "#4-40 x 3/4"
 ```
 
+**Custom Text Override (v16.1 Enhancement)**:
+- **`custom_display_text` field**: Allows user to override auto-generated text for any hardware type
+- **Nuts and Washers**: When custom text is empty, displays thread specification (e.g., "#4-40")
+- **Bolts and Screws**: When custom text is empty, displays full specification (e.g., "#4-40 x 3/4")
+- **Custom Override Examples**: User can enter "SAE" or "Metric" or any custom identifier
+
 **Prohibited**: Multiple conversion paths that could show decimals instead of fractions
 - ❌ Convert fraction → decimal → back to fraction
 - ✅ Use original dropdown strings directly
@@ -88,7 +88,7 @@ display_text = str(thread_spec, " x ", length_fraction)
 - No quotation marks in printed output (`"` symbols prohibited)
 - Machine screws: `#8-32 x 1/2`
 - Fractional: `1/4-20 x 3/4`
-- Nuts/washers: Thread specification only (`#8-32`, `1/4-20`)
+- Nuts/washers: Thread specification only (`#8-32`, `1/4-20`) or custom text
 
 ### 7. Icon Generation System
 **Dimensional Scaling**: Icons scale proportionally with length_mm converted from fractional inches
@@ -96,62 +96,93 @@ display_text = str(thread_spec, " x ", length_fraction)
 - **Maximum Display Length**: `20 * label_units` (prevents overflow)
 - **Long Bolt Handling**: Split stem with gap for bolts exceeding max length
 
-**Icon Types**:
-- **Phillips**: Cross pattern in circular head
-- **Socket/Hex**: Geometric drive patterns (hexagonal)
-- **Torx**: Six-pointed star pattern
-- **Button**: Domed head profile
-- **Countersunk**: Tapered head profile
-- **Wood Screws**: Pointed tip extension
-- **Nuts**: Hexagonal profile with thread indication
-- **Washers**: Ring profile with thickness indicator
+**Icon Design Standards (v16.1 Updates)**:
+
+**Top View Icons (Looking down on head)**:
+- **Round Heads** (smooth circular outline, $fn=32):
+  - Phillips head bolt: Round with cross slots
+  - Socket head bolt: Round with hexagonal socket
+  - Button head bolt: Round with hexagonal socket
+  - Torx head bolt: Round with star socket
+  - All countersunk variants: Round with respective drive pattern
+  - Wood screws: Round with drive pattern
+  
+- **Hexagonal Heads**:
+  - Hex head bolt: Hexagonal outline ($fn=6)
+  - Standard nut: Hexagonal with smooth circular hole ($fn=32 for hole)
+  - Lock nut: Hexagonal with smooth circular hole ($fn=32 for hole)
+
+- **Special Icons**:
+  - Standard washer: Simple ring (circle with circular hole)
+  - Spring washer: Split ring (gap indicating spring action)
+  - Wall anchor: Expansion pattern
+  - Heat set insert: Knurled pattern indication
+
+**Side View Profiles**:
+- **Button head**: Rounded/domed profile
+- **Lock nut**: Taller profile with rounded top (nylon insert indication)
+- **Countersunk**: Angled taper profile
+- **Wood screws**: Pointed tip
+- **Standard components**: Straight rectangular profile
 
 ### 8. User Interface Parameters
-**Single Label Mode Only**:
+**Single Label Mode**:
 - `hardware_type`: Dropdown of all supported component types
 - `thread_spec`: Ordered dropdown (machine screws first, then fractional)
-- `length_fraction`: Dropdown of 38 fractional options (3/8" to 8")
-- `custom_display_text`: Override field for special cases
-- `custom_text_only`: Text for custom labels
+- `length_fraction`: Dropdown of 29 fractional options (1/4" to 2")
+- `custom_display_text`: Override field for custom text on any hardware type
+- `custom_text_only`: Text for "Custom text" hardware type (no icon)
+
+**Batch Mode**:
+- `enable_batch_all_sizes`: Toggle for batch generation
+- `batch_hardware_type`: Hardware selection for batch
+- `batch_thread_spec`: Thread selection for batch
 
 **Visual Properties**:
-- `label_units`: Size selection (1=Small, 2=Medium, 3=Large)
+- `label_units`: Size selection (1=Small 37.8mm, 2=Medium 75.6mm, 3=Large 113.4mm)
 - `base_color`: Default white (#FFFFFF), user configurable
 - `content_color`: Default black (#000000), user configurable
-- `text_mode`: Raised (0.3mm) or Flush (0.01mm) text
 - `export_mode`: Complete, Base only, or Content only
 
 **Typography Controls**:
 - `font_family`: Roboto, Arial, Open Sans, Noto Sans, Liberation Sans
 - `font_weight`: Regular, Bold, Light, Medium
-- `text_size`: Configurable text size (default 4.0)
+- `text_size`: Configurable text size (default 3.5)
+
+**Advanced Settings**:
+- `label_width`: 11.7mm
+- `label_thickness`: 0.8mm
+- `corner_radius`: 0.9mm
+- `edge_chamfer`: 0.2mm
+- `raised_height`: 0.3mm
 
 ### 9. Code Architecture Requirements
 **Data Consistency**:
 - **Single Source Principle**: All display text must derive from dropdown string values
-- **No Decimal Conversion**: Avoid converting fractional strings to decimal then back
+- **Custom Text Handling**: Properly pass and use custom_display_text through all functions
 - **Parameter Validation**: Ensure dropdown selections map correctly to internal calculations
 
 **Modular Design**:
 - Separate icon generation modules for each hardware type
-- Unified text rendering system
+- Unified text rendering system accepting display_text parameter
 - Parametric label base with configurable dimensions (no holes)
 - Centralized fractional-to-decimal conversion for internal calculations only
 
 **Function Separation**:
 ```
 fraction_to_decimal(string) → decimal  // For internal calculations only
-render_text(string) → 3D text         // Uses string values directly
+render_text(display_text) → 3D text   // Uses passed text parameter
 create_single_label() → Complete label // Single label generation
+label_content(type, thread, display_text, length_mm) // Handles all content rendering
 ```
 
-**Removed Functionality**:
-- No multi-label parsing or generation
-- No natural language processing
-- No batch operations
-- No mounting hole generation
-
 ### 10. Quality Assurance
+**Icon Accuracy (v16.1 Critical Fixes)**:
+- All bolt heads must be geometrically correct (round vs hex)
+- Smooth circular holes in nuts (no polygonal artifacts)
+- Proper washer representation (simple rings, no extraneous geometry)
+- Correct socket patterns (hex for Allen, star for Torx, cross for Phillips)
+
 **Dimensional Accuracy**: All measurements converted to millimeters for consistent internal calculations
 - Thread specifications remain as strings for display
 - Length calculations use converted millimeter values
@@ -176,47 +207,59 @@ create_single_label() → Complete label // Single label generation
 3. **Thread Order**: Machine screws (#4-40) before fractional (1/4-20)
 4. **Quotation Marks**: Remove all `\"` from display text generation
 5. **Inconsistent Parameters**: Ensure variable names match between functions
-6. **Multi-label Remnants**: No batch processing code or interfaces
+6. **Custom Text Ignored**: Always pass display_text through to render functions
+7. **Polygonal Circles**: Use appropriate $fn values (32 for smooth, 6 for hex)
 
 **Validation Requirements**:
 - Verify fractional dropdown values convert correctly to millimeters
-- Test that all 38 length options generate proper display text
+- Test that all 29 length options generate proper display text
 - Confirm thread specification ordering in dropdown
 - Validate icon scaling across full length range
 - Ensure clean base geometry without holes
-- **Verify text fits within label boundaries for all thread/length combinations**
+- Verify text fits within label boundaries for all thread/length combinations
+- **Confirm custom_display_text overrides work for all hardware types**
+- **Validate icon geometry matches physical hardware appearance**
 
 ### 12. Default Configuration
 **Standard Settings**:
-- Label size: Small (35.8mm length)
-- Colors: White base with black text
-- Text: Raised 0.2mm above base
-- Font: Roboto Bold, size 4.0
+- Label size: Small (37.8mm length)
+- Colors: White base (#FFFFFF) with black text (#000000)
+- Text: Raised 0.3mm above base
+- Font: Roboto Bold, size 3.5
 - Thread: #4-40 (most common machine screw)
 - Length: 3/4" (common fastener length)
+- Hardware type: Button head bolt
 
 ### 13. Version Control
-**v16 Enhancements**:
-- Fractional length dropdown interface (38 options)
-- Single source of truth for display text generation
+**v16.1 Bug Fixes and Enhancements**:
+- Fixed custom_display_text to work properly with nuts and washers
+- Corrected standard washer icon (removed hex artifact, now simple ring)
+- Fixed nut icons to have smooth circular holes ($fn=32)
+- Corrected all round-head bolts to display circular tops ($fn=32)
+- Updated lock nut side profile to show rounded/domed top
+- Ensured proper icon geometry for all hardware types
+- Enhanced display_text parameter flow through all rendering functions
+
+**v16 Original Features**:
+- Fractional length dropdown interface (29 options)
+- Batch all sizes generation mode
 - Eliminated decimal display issues
-- Removed all multi-label functionality
 - Changed default colors to white base/black text
 - Removed mounting holes from base design
-- Preserved v15 thread ordering and quotation mark fixes
+- Preserved thread ordering and quotation mark fixes
 
-**Architecture Simplifications**:
-- Single label generation only
-- Direct parameter selection
-- No parsing or batch operations
+**Architecture Principles**:
+- Single source of truth for display text
+- Direct parameter selection via dropdowns
 - Clean base design without attachment points
+- Extensible icon system for future hardware types
 
 ## Implementation Considerations
 - Prioritize dropdown string values over calculated values for display
 - Use OpenSCAD's parametric capabilities for maximum flexibility
-- Focus on single label perfection rather than batch operations
-- Maintain clean, printable geometry without mounting features
-- Support future Imperial hardware types through extensible architecture
+- Maintain icon accuracy matching real hardware appearance
+- Support custom text overrides for specialized labeling needs
 - Ensure high contrast visibility with default white/black color scheme
+- Test all hardware type and custom text combinations thoroughly
 
-This specification ensures robust Imperial hardware label generation with user-friendly fractional interfaces while maintaining a focused, single-label approach that prevents common implementation pitfalls through clear architectural guidelines.
+This specification ensures robust Imperial hardware label generation with accurate icon representations, flexible custom text options, and user-friendly fractional interfaces while maintaining clean, printable geometry optimized for dual-color 3D printing.
