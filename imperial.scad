@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////
 
 /* [Single Label Mode] */
-hardware_type = "Button head bolt"; // [Phillips head bolt, Socket head bolt, Hex head bolt, Button head bolt, Torx head bolt, Phillips head countersunk, Torx head countersunk, Socket head countersunk, Phillips wood screw, Torx wood screw, Wall anchor, Heat set insert, Standard nut, Lock nut, Standard washer, Spring washer, Custom text, None]
+hardware_type = "Button head screw"; // [Phillips head bolt, Socket head bolt, Hex head bolt, Button head screw, Torx head bolt, Phillips head countersunk, Torx head countersunk, Socket head countersunk, Phillips wood screw, Torx wood screw, Wall anchor, Heat set insert, Standard nut, Lock nut, Standard washer, Spring washer, Custom text, None]
 thread_spec = "#4-40"; // [#4-40, #4-48, #5-40, #5-44, #6-32, #6-40, #8-32, #8-36, #10-24, #10-32, #12-24, #12-28, 1/4-20, 1/4-28, 5/16-18, 5/16-24, 3/8-16, 3/8-24, 7/16-14, 7/16-20, 1/2-13, 1/2-20, 9/16-12, 9/16-18, 5/8-11, 5/8-18, 3/4-10, 3/4-16, 7/8-9, 7/8-14, 1-8, 1-12]
 length_fraction = "3/4"; // [1/4, 5/16, 3/8, 7/16, 1/2, 9/16, 5/8, 11/16, 3/4, 13/16, 7/8, 15/16, 1, 1-1/16, 1-1/8, 1-3/16, 1-1/4, 1-5/16, 1-3/8, 1-7/16, 1-1/2, 1-9/16, 1-5/8, 1-11/16, 1-3/4, 1-13/16, 1-7/8, 1-15/16, 2]
 custom_display_text = ""; // Custom text override (leave blank for auto-generation)
@@ -13,7 +13,7 @@ custom_text_only = "Custom"; // Used only when hardware_type is "Custom text"
 
 /* [Batch All Sizes Mode] */
 enable_batch_all_sizes = false;
-batch_hardware_type = "Phillips head bolt"; // [Phillips head bolt, Socket head bolt, Hex head bolt, Button head bolt, Torx head bolt, Phillips head countersunk, Torx head countersunk, Socket head countersunk, Phillips wood screw, Torx wood screw, Wall anchor, Heat set insert, Standard nut, Lock nut, Standard washer, Spring washer]
+batch_hardware_type = "Phillips head screw"; // [Phillips head screw, Socket head bolt, Hex head bolt, Button head screw, Torx head bolt, Phillips head countersunk, Torx head countersunk, Socket head countersunk, Phillips wood screw, Torx wood screw, Wall anchor, Heat set insert, Standard nut, Lock nut, Standard washer, Spring washer]
 batch_thread_spec = "#4-40"; // [#4-40, #4-48, #5-40, #5-44, #6-32, #6-40, #8-32, #8-36, #10-24, #10-32, #12-24, #12-28, 1/4-20, 1/4-28, 5/16-18, 5/16-24, 3/8-16, 3/8-24, 7/16-14, 7/16-20, 1/2-13, 1/2-20, 9/16-12, 9/16-18, 5/8-11, 5/8-18, 3/4-10, 3/4-16, 7/8-9, 7/8-14, 1-8, 1-12]
 
 /* [Label Properties] */
@@ -229,13 +229,13 @@ module render_text(text_content) {
 module render_hardware_icon(type, length_mm) {
     icon_y_pos = label_width/4-1;  // Position icon closer to center and further from text
     
-    if (type == "Phillips head bolt") {
+    if (type == "Phillips head screw") {
         phillips_bolt_icon(length_mm, icon_y_pos);
     } else if (type == "Socket head bolt") {
         socket_bolt_icon(length_mm, icon_y_pos);
     } else if (type == "Hex head bolt") {
         hex_bolt_icon(length_mm, icon_y_pos);
-    } else if (type == "Button head bolt") {
+    } else if (type == "Button head screw") {
         button_bolt_icon(length_mm, icon_y_pos);
     } else if (type == "Torx head bolt") {
         torx_bolt_icon(length_mm, icon_y_pos);
@@ -449,12 +449,12 @@ module button_bolt_icon(length_mm, y_pos) {
         }
     }
     
-    // Side view - rounded/domed profile for button head
-    translate([head_x + 3, y_pos, z_pos]) {
+    // Side view - original logic restored
+    translate([head_x + 5, y_pos, z_pos]) {
         linear_extrude(height = text_height) {
             intersection() {
-                circle(d = 4, $fn = 32);
-                translate([0, -2]) square([2, 4]);
+                circle(d = 4);
+                translate([-2, -2]) square([2, 4]);
             }
         }
     }
@@ -642,12 +642,17 @@ module standard_washer_icon(y_pos) {
     z_pos = label_thickness;
     center_x = 0;
     
-    // Simple ring shape - just a circle with a hole
-    translate([center_x, y_pos, z_pos]) {
+    // Top view - simple ring shape with smooth circles
+    translate([center_x - 1, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 5);
-            cylinder(h = text_height, d = 2.5);
+            cylinder(h = text_height, d = 4, $fn = 32);  // Smooth outer circle
+            cylinder(h = text_height, d = 2.5, $fn = 32);  // Smooth inner hole
         }
+    }
+    
+    // Side view - thin rectangular profile
+    translate([center_x + 1.5, y_pos - 2, z_pos]) {
+        cube([0.75, 4, text_height]);
     }
 }
 
@@ -657,9 +662,9 @@ module spring_washer_icon(y_pos) {
     
     translate([center_x - 1, y_pos, z_pos]) {
         difference() {
-            cylinder(h = text_height, d = 4);
-            cylinder(h = text_height, d = 2.5);
-            translate([0, -0.3, 0]) cube([4, 0.6, text_height]);
+            cylinder(h = text_height, d = 4, $fn = 32);  // Smooth outer circle
+            cylinder(h = text_height, d = 2.5, $fn = 32);  // Smooth inner hole
+            translate([0, -0.3, 0]) cube([4, 0.6, text_height]);  // Gap for spring
         }
     }
     
