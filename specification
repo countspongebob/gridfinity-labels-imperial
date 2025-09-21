@@ -266,4 +266,125 @@ label_content(type, thread, display_text, length_mm) // Handles all content rend
 - Ensure high contrast visibility with default white/black color scheme
 - Test all hardware type and custom text combinations thoroughly
 
+## Implementation Notes and Lessons Learned
+
+### Icon Design Philosophy
+Icons represent the **actual physical appearance** of hardware when viewed from above (top view) and from the side (side view). This is critical:
+- Round heads must be round because that's what you see looking down at a Phillips or socket head cap screw
+- Hex heads must be hexagonal because that's their actual shape
+- Washers are simple rings because that's their physical form
+- The goal is immediate visual recognition matching the physical part
+
+### Critical Code Patterns to Preserve
+
+#### Button Head Side View Positioning
+The button head bolt (screw) side view has been carefully calibrated over many iterations. The working pattern is:
+```openscad
+translate([head_x + 5, y_pos, z_pos]) {  // Note: +5, not +3
+    linear_extrude(height = text_height) {
+        intersection() {
+            circle(d = 4);  // No $fn needed here
+            translate([-2, -2]) square([2, 4]);
+        }
+    }
+}
+```
+**DO NOT CHANGE** the positioning values without extensive testing.
+
+#### $fn Values for Geometry
+- **Smooth circles**: Always use `$fn = 32`
+- **Hexagonal shapes**: Always use `$fn = 6` 
+- **Default (no $fn)**: Only when the exact circle smoothness doesn't matter (e.g., for intersections)
+
+#### Custom Text Field Architecture
+Two separate custom text fields exist for different purposes:
+- `custom_display_text`: Overrides auto-generated text for ANY hardware type while keeping the icon
+- `custom_text_only`: Used ONLY when hardware_type is "Custom text" (no icon at all)
+
+This separation allows users to:
+1. Create standard hardware labels with custom text (e.g., "SAE" for a washer)
+2. Create completely custom labels with no hardware icon
+
+### Known Issues and Workarounds
+
+#### Socket Head Countersunk 7-Sided Issue
+Despite correct code (`$fn = 32` for outer cylinder), socket head countersunk may display with 7 sides in some OpenSCAD configurations. The code is correct; this appears to be a rendering issue. If encountered:
+1. Force refresh with F5/F6
+2. Check for global `$fn` overrides
+3. Verify no other transformations are affecting the geometry
+
+#### Function Naming vs UI Labels
+Internal function names don't always match UI labels for historical reasons:
+- Function: `button_bolt_icon()` → UI: "Button head screw"
+- Function: `phillips_bolt_icon()` → UI: "Phillips head screw"
+
+These function names are preserved to maintain code stability.
+
+### Dimensional Discrepancies
+- Label width: Code uses 11.7mm (measured/tested value) vs 11.5mm in original spec
+- Both values work, but 11.7mm provides better text spacing
+- The 37.8mm/75.6mm/113.4mm lengths are precisely calibrated for label maker tapes
+
+### Testing Checklist for Future Modifications
+
+Before accepting any icon changes, verify:
+1. **Top view geometry**: Round items are round, hex items are hex
+2. **Side view alignment**: Icons align properly with bolt stems
+3. **Custom text flow**: Test with empty and filled custom_display_text
+4. **Nuts/washers**: Verify they show thread spec when custom text is empty
+5. **Long bolts**: Check that stems extend continuously to max_length (no gaps)
+6. **Batch generation**: Ensure all 29 sizes generate correctly
+
+### Common Mistakes to Avoid
+
+1. **Converting fractional displays to decimal**: Always display "3/4" not "0.75"
+2. **Breaking button head positioning**: The +5 offset is critical
+3. **Missing side views**: Washers and nuts need side profile views
+4. **Assuming all bolts are "bolts"**: Phillips and Button heads are "screws" in common usage
+5. **Forgetting $fn for circles**: Undefined $fn can create unexpected polygons
+6. **Ignoring display_text parameter**: Must flow through to render_text()
+
+### Historical Context
+
+#### Version Evolution
+- **v15**: Had quotation marks in display, wrong thread ordering, decimal display issues
+- **v16**: Fixed quotation marks, proper thread sort, fractional display, added batch mode
+- **v16.1**: Fixed icon geometry, custom text handling, nomenclature (bolt vs screw)
+
+#### Design Decisions
+- **No mounting holes**: Removed for cleaner appearance and easier printing
+- **White/black default**: Maximum contrast for readability
+- **Raised text (0.3mm)**: Optimized for both visibility and print reliability
+- **Small default size**: Most common for typical parts bins
+
+### Future Modification Guidelines
+
+When adding new hardware types:
+1. Study similar existing icons for pattern consistency
+2. Maintain separate top and side view components
+3. Use consistent positioning relative to existing icons
+4. Test with all three label sizes
+5. Ensure text generation follows established patterns
+6. Add to both single and batch mode dropdowns
+
+When modifying existing icons:
+1. Document WHY the change is needed
+2. Test across all label sizes and lengths
+3. Verify custom text still works
+4. Check batch generation still functions
+5. Compare before/after with multiple examples
+
+### Critical Files and Functions
+
+Key functions that should be modified with extreme caution:
+- `bolt_stem()`: Core stem rendering, affects all bolts
+- `label_content()`: Central routing for all content rendering  
+- `render_text()`: Text positioning affects all labels
+- `fraction_to_decimal()`: Must maintain all 29 conversions exactly
+
+Parameters that cascade through the system:
+- `display_text`: Must flow from main → create_single_label → label_content → render_text
+- `length_mm`: Affects icon scaling and stem length
+- `text_height`: Global affect on all raised elements
+
 This specification ensures robust Imperial hardware label generation with accurate icon representations, flexible custom text options, and user-friendly fractional interfaces while maintaining clean, printable geometry optimized for dual-color 3D printing.
