@@ -272,22 +272,9 @@ module bolt_stem(length_mm, start_x, y_pos, stem_width = 2.0) {
     effective_length = min(length_mm, max_bolt_length);
     z_pos = label_thickness;
     
-    if (length_mm > max_bolt_length) {
-        // Split stem for long bolts
-        gap = 2;
-        segment_len = (effective_length - gap) / 2;
-        
-        translate([start_x, y_pos - stem_width/2, z_pos]) {
-            cube([segment_len, stem_width, text_height]);
-        }
-        
-        translate([start_x + segment_len + gap, y_pos - stem_width/2, z_pos]) {
-            cube([segment_len, stem_width, text_height]);
-        }
-    } else {
-        translate([start_x, y_pos - stem_width/2, z_pos]) {
-            cube([effective_length, stem_width, text_height]);
-        }
+    // Always show continuous stem, capped at max_bolt_length
+    translate([start_x, y_pos - stem_width/2, z_pos]) {
+        cube([effective_length, stem_width, text_height]);
     }
 }
 
