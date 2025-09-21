@@ -94,7 +94,7 @@ display_text = str(thread_spec, " x ", length_fraction)
 **Dimensional Scaling**: Icons scale proportionally with length_mm converted from fractional inches
 - **Conversion**: `length_mm = length_inches * 25.4`
 - **Maximum Display Length**: `20 * label_units` (prevents overflow)
-- **Long Bolt Handling**: Split stem with gap for bolts exceeding max length
+- **Long Bolt Handling**: Stem displays continuously up to max length (no gaps or splits)
 
 **Icon Design Standards (v16.1 Updates)**:
 
@@ -240,6 +240,7 @@ label_content(type, thread, display_text, length_mm) // Handles all content rend
 - Updated lock nut side profile to show rounded/domed top
 - Changed "Phillips head bolt" to "Phillips head screw" in interface
 - Changed "Button head bolt" to "Button head screw" in interface
+- Removed gap/split display for long bolts (now shows continuous stem at max length)
 - Ensured proper icon geometry for all hardware types
 - Enhanced display_text parameter flow through all rendering functions
 
