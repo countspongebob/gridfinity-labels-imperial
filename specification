@@ -1,4 +1,35 @@
-# 3D Printable Parts Bin Label Generator - IMPERIAL SPECIFICATION v16.1
+# 3D Printable Parts Bin Label Generator - IMPERIAL SPECIFICATION v20
+
+## AI Assistant Implementation Guide (READ FIRST)
+
+**CRITICAL CONTEXT FOR AI ASSISTANTS:**
+You are working with version 20 of a mature, production-tested OpenSCAD label generator. This code has undergone extensive debugging and optimization. Many "obvious improvements" have already been tried and either failed or caused subtle issues.
+
+**BEFORE MAKING ANY CHANGES:**
+1. Read the entire "Implementation Notes and Lessons Learned" section at the end of this document
+2. Understand that all icon geometries have been carefully calibrated to match physical hardware
+3. Know that the button head side view positioning (head_x + 5) is particularly sensitive and correct as-is
+4. Be aware that custom text handling for nuts/washers has specific behavior that must be preserved
+5. Recognize that $fn values (32 for smooth, 6 for hex) are intentionally chosen
+
+**WHEN ASKED TO MODIFY THIS CODE:**
+- Assume the existing code is working correctly unless specifically told otherwise
+- Preserve all existing parameter flows, especially display_text through all functions
+- Test changes with empty and filled custom_display_text fields
+- Ensure nuts/washers show thread spec when custom text is empty
+- Never "optimize" the button head side view without explicit request
+- Check the Implementation Notes for why certain patterns exist before changing them
+
+**COMMON PITFALLS TO AVOID:**
+- Don't change "button_bolt_icon" function name even though UI says "Button head screw"
+- Don't modify bolt stem positioning without understanding the icon alignment system
+- Don't assume round icons are mistakes - they match physical hardware appearance
+- Don't simplify the dual custom text field system - both fields serve different purposes
+
+**IF SUGGESTING IMPROVEMENTS:**
+Focus on adding new capabilities rather than "fixing" existing working features. The code prioritizes reliability and print quality over elegance. Any changes should be tested across all hardware types, label sizes, and length options.
+
+---
 
 ## Overview
 A parametric OpenSCAD-based system for generating customizable 3D printable single labels for parts storage bins. This specification covers Imperial hardware (machine screws #4-40 through 1"-12) with dual-color 3D printing support and fractional length dropdown interface.
@@ -6,11 +37,16 @@ A parametric OpenSCAD-based system for generating customizable 3D printable sing
 ## Core Requirements
 
 ### 1. Label Physical Specifications
-- **Base Dimensions**: Configurable length based on units (1-3 units: 37.8mm, 75.6mm, 113.4mm), fixed width 11.7mm
+- **Base Dimensions**: Configurable length based on units (1-3 units: 37.8mm, 79.6mm, 113.4mm), fixed width 11.7mm
 - **Height**: 0.8mm base with 0.3mm raised text/icons (or 0.01mm flush text)
 - **Material**: Single or dual-color 3D printing support
-- **Mounting**: Clean solid base with no holes or attachment points
-- **Edge Treatment**: Rounded corners with configurable radius (default 0.9mm) and chamfered top/bottom edges (default 0.2mm)
+- **Mounting**: Clean solid base with optional side retention tabs
+- **Edge Treatment**: Rounded corners with configurable radius (default 2.0mm) and chamfered top/bottom edges (default 0.2mm)
+- **Side Tabs** (optional): Triangular retention tabs on left/right sides
+  - Configurable count (default 3 per side)
+  - Configurable size (default 1.0mm)
+  - Equally spaced along label length
+  - Help secure label against bin walls
 - **Default Colors**: White base (#FFFFFF) with black text/icons (#000000)
 
 ### 2. Imperial Thread Specifications
@@ -59,7 +95,7 @@ A parametric OpenSCAD-based system for generating customizable 3D printable sing
 - **Interface**: Toggle to enable batch mode with separate hardware type and thread specification dropdowns
 - **Responsive Grid Layout**: Column count adapts to label size to optimize print bed usage
   - Small labels (37.8mm): 6 columns
-  - Medium labels (75.6mm): 3 columns  
+  - Medium labels (79.6mm): 3 columns  
   - Large labels (113.4mm): 2 columns
 - **Spacing**: Minimal 1mm gaps between labels to reduce material waste
 - **Coverage**: Automatically generates all 29 fractional lengths (1/4" through 2" in 1/16" increments)
@@ -139,7 +175,7 @@ display_text = str(thread_spec, " x ", length_fraction)
 - `batch_thread_spec`: Thread selection for batch
 
 **Visual Properties**:
-- `label_units`: Size selection (1=Small 37.8mm, 2=Medium 75.6mm, 3=Large 113.4mm)
+- `label_units`: Size selection (1=Small 37.8mm, 2=Medium 79.6mm, 3=Large 113.4mm)
 - `base_color`: Default white (#FFFFFF), user configurable
 - `content_color`: Default black (#000000), user configurable
 - `export_mode`: Complete, Base only, or Content only
@@ -152,9 +188,12 @@ display_text = str(thread_spec, " x ", length_fraction)
 **Advanced Settings**:
 - `label_width`: 11.7mm
 - `label_thickness`: 0.8mm
-- `corner_radius`: 0.9mm
+- `corner_radius`: 2.0mm
 - `edge_chamfer`: 0.2mm
 - `raised_height`: 0.3mm
+- `enable_side_tabs`: false (toggle for retention tabs)
+- `tab_size`: 1.0mm (triangular tab projection)
+- `tab_count`: 3 (tabs per side)
 
 ### 9. Code Architecture Requirements
 **Data Consistency**:
@@ -231,7 +270,16 @@ label_content(type, thread, display_text, length_mm) // Handles all content rend
 - Hardware type: Button head screw
 
 ### 13. Version Control
-**v16.1 Bug Fixes and Enhancements**:
+**v16.2 Enhancements**:
+- Increased default corner radius to 2.0mm for softer appearance
+- Updated medium label length to 78.6mm (corrected dimension)
+- Added optional side retention tabs for bin mounting:
+  - Triangular tabs on left and right sides
+  - Configurable count and size
+  - Helps secure labels against bin walls
+- Continuous bolt stem display (removed gap for long bolts)
+
+**v16.1 Bug Fixes**:
 - Fixed custom_display_text to work properly with nuts and washers
 - Corrected standard washer icon (simple ring with smooth circles, restored side view)
 - Fixed spring washer icon (smooth circular rings inside and out)
@@ -323,7 +371,7 @@ These function names are preserved to maintain code stability.
 ### Dimensional Discrepancies
 - Label width: Code uses 11.7mm (measured/tested value) vs 11.5mm in original spec
 - Both values work, but 11.7mm provides better text spacing
-- The 37.8mm/75.6mm/113.4mm lengths are precisely calibrated for label maker tapes
+- The 37.8mm/79.6mm/113.4mm lengths are precisely calibrated for label maker tapes
 
 ### Testing Checklist for Future Modifications
 
