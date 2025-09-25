@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////
 //        Parts Bin Label Generator - IMPERIAL        //
 //         Fractional & Machine Screw Support         //
-//         Version 20 - Medium Label Width Update     //
+//       Version 22 - Side Tabs Enabled by Default    //
 ////////////////////////////////////////////////////////
 
 /* [Single Label Mode] */
@@ -33,9 +33,9 @@ label_thickness = 0.8;
 corner_radius = 2.0;
 edge_chamfer = 0.2;
 raised_height = 0.3;
-enable_side_tabs = false; // Enable triangular tabs on sides
-tab_size = 1.0; // Size of triangular tabs in mm
-tab_count = 3; // Number of tabs per side
+enable_side_tabs = true; // Enable rectangular tabs on sides
+tab_depth = 1.0; // How far tabs extend from label edge (mm)
+tab_width = 6.0; // Width of rectangular tabs (mm)
 
 // Internal calculations
 label_length = (label_units == 1) ? 37.8 : (label_units == 2) ? 79.6 : 113.4;
@@ -192,33 +192,14 @@ module label_base() {
     
     // Add side tabs if enabled
     if (enable_side_tabs) {
-        // Calculate tab spacing
-        tab_spacing = label_width / (tab_count + 1);
-        
-        // Left side tabs
-        for (i = [1:tab_count]) {
-            translate([-label_length/2, -label_width/2 + i * tab_spacing, 0]) {
-                linear_extrude(height = label_thickness) {
-                    polygon(points = [
-                        [0, -tab_size/2],
-                        [0, tab_size/2],
-                        [-tab_size, 0]
-                    ]);
-                }
-            }
+        // Left side tab - centered
+        translate([-label_length/2 - tab_depth, -tab_width/2, 0]) {
+            cube([tab_depth, tab_width, label_thickness]);
         }
         
-        // Right side tabs
-        for (i = [1:tab_count]) {
-            translate([label_length/2, -label_width/2 + i * tab_spacing, 0]) {
-                linear_extrude(height = label_thickness) {
-                    polygon(points = [
-                        [0, -tab_size/2],
-                        [0, tab_size/2],
-                        [tab_size, 0]
-                    ]);
-                }
-            }
+        // Right side tab - centered
+        translate([label_length/2, -tab_width/2, 0]) {
+            cube([tab_depth, tab_width, label_thickness]);
         }
     }
 }
