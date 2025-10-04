@@ -1,9 +1,9 @@
-# 3D Printable Parts Bin Label Generator - IMPERIAL SPECIFICATION v28
+# 3D Printable Parts Bin Label Generator - IMPERIAL SPECIFICATION v94
 
 ## AI Assistant Implementation Guide (READ FIRST)
 
 **CRITICAL CONTEXT FOR AI ASSISTANTS:**
-You are working with version 28 of a mature, production-tested OpenSCAD label generator. This code has undergone extensive debugging and optimization. Many "obvious improvements" have already been tried and either failed or caused subtle issues.
+You are working with version 94 of a mature, production-tested OpenSCAD label generator. This code has undergone extensive debugging and optimization. Many "obvious improvements" have already been tried and either failed or caused subtle issues.
 
 **BEFORE MAKING ANY CHANGES:**
 1. Read the entire "Implementation Notes and Lessons Learned" section at the end of this document
@@ -89,7 +89,7 @@ A parametric OpenSCAD-based system for generating customizable 3D printable sing
 - Wall anchors, Heat set inserts
 
 **Fasteners**:
-- Standard nuts, Lock nuts
+- Standard nuts, Jam nuts, Lock nuts
 - Standard washers, SAE washers, Lock washers
 
 ### 5. Batch All Sizes Generation
@@ -136,20 +136,22 @@ display_text = str(thread_spec, " x ", length_fraction)
 - **Maximum Display Length**: `20 * label_units` (prevents overflow)
 - **Long Bolt Handling**: Stem displays continuously up to max length (no gaps or splits)
 
-**Icon Design Standards (v16.1 Updates)**:
+**Icon Design Standards (v94 Updates)**:
 
 **Top View Icons (Looking down on head)**:
 - **Round Heads** (smooth circular outline, $fn=32):
   - Phillips head screw: Round with cross slots
   - Socket head bolt: Round with hexagonal socket
   - Button head screw: Round with hexagonal socket
-  - Torx head bolt: Round with star socket
+  - Torx head bolt: Round with improved curved-lobe star socket
   - All countersunk variants: Round with respective drive pattern
   - Wood screws: Round with drive pattern
+  - **Note**: Some icons use 2D shapes (circle()) extruded rather than cylinder() to avoid 7-sided rendering bugs
   
 - **Hexagonal Heads**:
   - Hex head bolt: Hexagonal outline ($fn=6)
   - Standard nut: Hexagonal with smooth circular hole ($fn=32 for hole)
+  - Jam nut: Hexagonal with smooth circular hole (half-width side profile)
   - Lock nut: Hexagonal with smooth circular hole ($fn=32 for hole)
 
 - **Special Icons**:
