@@ -1,23 +1,23 @@
 ////////////////////////////////////////////////////////
 //        Parts Bin Label Generator - IMPERIAL        //
 //         Fractional & Machine Screw Support         //
-//       Version 22 - Side Tabs Enabled by Default    //
+//     Version 28 - Medium Width Final Tune 77.4mm    //
 ////////////////////////////////////////////////////////
 
 /* [Single Label Mode] */
-hardware_type = "Button head screw"; // [Phillips head bolt, Socket head bolt, Hex head bolt, Button head screw, Torx head bolt, Phillips head countersunk, Torx head countersunk, Socket head countersunk, Phillips wood screw, Torx wood screw, Wall anchor, Heat set insert, Standard nut, Lock nut, Standard washer, Spring washer, Custom text, None]
+hardware_type = "Button head screw"; // [Phillips head screw, Socket head bolt, Hex head bolt, Button head screw, Torx head bolt, Phillips head countersunk, Torx head countersunk, Socket head countersunk, Phillips wood screw, Torx wood screw, Wall anchor, Heat set insert, Standard nut, Lock nut, Standard washer, SAE washer, Lock washer, Custom text, None]
 thread_spec = "#4-40"; // [#4-40, #4-48, #5-40, #5-44, #6-32, #6-40, #8-32, #8-36, #10-24, #10-32, #12-24, #12-28, 1/4-20, 1/4-28, 5/16-18, 5/16-24, 3/8-16, 3/8-24, 7/16-14, 7/16-20, 1/2-13, 1/2-20, 9/16-12, 9/16-18, 5/8-11, 5/8-18, 3/4-10, 3/4-16, 7/8-9, 7/8-14, 1-8, 1-12]
-length_fraction = "3/4"; // [1/4, 5/16, 3/8, 7/16, 1/2, 9/16, 5/8, 11/16, 3/4, 13/16, 7/8, 15/16, 1, 1-1/16, 1-1/8, 1-3/16, 1-1/4, 1-5/16, 1-3/8, 1-7/16, 1-1/2, 1-9/16, 1-5/8, 1-11/16, 1-3/4, 1-13/16, 1-7/8, 1-15/16, 2]
+length_fraction = "3/4"; // [1/4, 5/16, 3/8, 7/16, 1/2, 9/16, 5/8, 11/16, 3/4, 13/16, 7/8, 15/16, 1, 1-1/16, 1-1/8, 1-3/16, 1-1/4, 1-5/16, 1-3/8, 1-7/16, 1-1/2, 1-9/16, 1-5/8, 1-11/16, 1-3/4, 1-13/16, 1-7/8, 1-15/16, 2, 2-1/4, 2-1/2, 2-3/4, 3, 3-1/4, 3-1/2, 3-3/4, 4, 4-1/4, 4-1/2, 4-3/4, 5, 5-1/4, 5-1/2, 5-3/4, 6, 6-1/4, 6-1/2, 6-3/4, 7, 7-1/4, 7-1/2, 7-3/4, 8]
 custom_display_text = ""; // Custom text override (leave blank for auto-generation)
 custom_text_only = "Custom"; // Used only when hardware_type is "Custom text"
 
 /* [Batch All Sizes Mode] */
 enable_batch_all_sizes = false;
-batch_hardware_type = "Phillips head screw"; // [Phillips head screw, Socket head bolt, Hex head bolt, Button head screw, Torx head bolt, Phillips head countersunk, Torx head countersunk, Socket head countersunk, Phillips wood screw, Torx wood screw, Wall anchor, Heat set insert, Standard nut, Lock nut, Standard washer, Spring washer]
+batch_hardware_type = "Phillips head screw"; // [Phillips head screw, Socket head bolt, Hex head bolt, Button head screw, Torx head bolt, Phillips head countersunk, Torx head countersunk, Socket head countersunk, Phillips wood screw, Torx wood screw, Wall anchor, Heat set insert, Standard nut, Lock nut, Standard washer, SAE washer, Lock washer]
 batch_thread_spec = "#4-40"; // [#4-40, #4-48, #5-40, #5-44, #6-32, #6-40, #8-32, #8-36, #10-24, #10-32, #12-24, #12-28, 1/4-20, 1/4-28, 5/16-18, 5/16-24, 3/8-16, 3/8-24, 7/16-14, 7/16-20, 1/2-13, 1/2-20, 9/16-12, 9/16-18, 5/8-11, 5/8-18, 3/4-10, 3/4-16, 7/8-9, 7/8-14, 1-8, 1-12]
 
 /* [Label Properties] */
-label_units = 1; // [1:Small (37.8mm), 2:Medium (79.6mm), 3:Large (113.4mm)]
+label_units = 1; // [1:Small (37.8mm), 2:Medium (77.4mm), 3:Large (113.4mm)]
 base_color = "#FFFFFF"; // Base label color
 content_color = "#000000"; // Text and icon color
 export_mode = "Complete"; // [Complete, Base only, Content only]
@@ -38,7 +38,7 @@ tab_depth = 1.0; // How far tabs extend from label edge (mm)
 tab_width = 6.0; // Width of rectangular tabs (mm)
 
 // Internal calculations
-label_length = (label_units == 1) ? 37.8 : (label_units == 2) ? 79.6 : 113.4;
+label_length = (label_units == 1) ? 37.8 : (label_units == 2) ? 77.4 : 113.4;
 text_height = raised_height;
 font_string = str(font_family, ":style=", font_weight);
 max_bolt_length = 20 * label_units;
@@ -50,7 +50,7 @@ h_spacing = label_length + 1; // 1mm gap between labels horizontally
 v_spacing = label_width + 1;  // 1mm gap between labels vertically
 
 // All fractional sizes for batch generation
-all_fractional_sizes = ["1/4", "5/16", "3/8", "7/16", "1/2", "9/16", "5/8", "11/16", "3/4", "13/16", "7/8", "15/16", "1", "1-1/16", "1-1/8", "1-3/16", "1-1/4", "1-5/16", "1-3/8", "1-7/16", "1-1/2", "1-9/16", "1-5/8", "1-11/16", "1-3/4", "1-13/16", "1-7/8", "1-15/16", "2"];
+all_fractional_sizes = ["1/4", "5/16", "3/8", "7/16", "1/2", "9/16", "5/8", "11/16", "3/4", "13/16", "7/8", "15/16", "1", "1-1/16", "1-1/8", "1-3/16", "1-1/4", "1-5/16", "1-3/8", "1-7/16", "1-1/2", "1-9/16", "1-5/8", "1-11/16", "1-3/4", "1-13/16", "1-7/8", "1-15/16", "2", "2-1/4", "2-1/2", "2-3/4", "3", "3-1/4", "3-1/2", "3-3/4", "4", "4-1/4", "4-1/2", "4-3/4", "5", "5-1/4", "5-1/2", "5-3/4", "6", "6-1/4", "6-1/2", "6-3/4", "7", "7-1/4", "7-1/2", "7-3/4", "8"];
 
 ////////////////////////////////////////////////////////
 //         IMPERIAL SYSTEM FUNCTIONS                 //
@@ -89,13 +89,54 @@ function fraction_to_decimal(frac_str) =
     (frac_str == "1-7/8") ? 1.875 :
     (frac_str == "1-15/16") ? 1.9375 :
     (frac_str == "2") ? 2.0 :
+    (frac_str == "2-1/4") ? 2.25 :
+    (frac_str == "2-1/2") ? 2.5 :
+    (frac_str == "2-3/4") ? 2.75 :
+    (frac_str == "3") ? 3.0 :
+    (frac_str == "3-1/4") ? 3.25 :
+    (frac_str == "3-1/2") ? 3.5 :
+    (frac_str == "3-3/4") ? 3.75 :
+    (frac_str == "4") ? 4.0 :
+    (frac_str == "4-1/4") ? 4.25 :
+    (frac_str == "4-1/2") ? 4.5 :
+    (frac_str == "4-3/4") ? 4.75 :
+    (frac_str == "5") ? 5.0 :
+    (frac_str == "5-1/4") ? 5.25 :
+    (frac_str == "5-1/2") ? 5.5 :
+    (frac_str == "5-3/4") ? 5.75 :
+    (frac_str == "6") ? 6.0 :
+    (frac_str == "6-1/4") ? 6.25 :
+    (frac_str == "6-1/2") ? 6.5 :
+    (frac_str == "6-3/4") ? 6.75 :
+    (frac_str == "7") ? 7.0 :
+    (frac_str == "7-1/4") ? 7.25 :
+    (frac_str == "7-1/2") ? 7.5 :
+    (frac_str == "7-3/4") ? 7.75 :
+    (frac_str == "8") ? 8.0 :
     0.75; // Default fallback
 
 function is_nut_or_washer_type(type) =
     type == "Standard nut" || 
     type == "Lock nut" || 
     type == "Standard washer" || 
-    type == "Spring washer";
+    type == "SAE washer" ||
+    type == "Lock washer";
+
+function is_washer_type(type) =
+    type == "Standard washer" || 
+    type == "SAE washer" ||
+    type == "Lock washer";
+
+// Extract size from thread spec (e.g., "3/4-10" -> "3/4", "#8-32" -> "#8")
+function get_size_from_thread(thread) =
+    let(dash_pos = search("-", thread))
+    (len(dash_pos) > 0) ? substr(thread, 0, dash_pos[0]) : thread;
+
+// Helper function to extract substring (OpenSCAD doesn't have substr built-in)
+function substr(str, start, end) = 
+    (start >= len(str) || start >= end) ? "" :
+    (start == 0 && end >= len(str)) ? str :
+    chr([for (i = [start:min(end-1, len(str)-1)]) ord(str[i])]);
 
 ////////////////////////////////////////////////////////
 //                 MAIN EXECUTION                    //
@@ -211,9 +252,20 @@ module label_base() {
 module label_content(type, thread, display_text, length_mm) {
     if (type == "Custom text") {
         render_text(custom_text_only);
-    } else if (is_nut_or_washer_type(type)) {
+    } else if (is_washer_type(type)) {
+        // Washers: icon on top, size + type on bottom
         render_hardware_icon(type, length_mm);
-        // FIXED: Now uses display_text instead of thread
+        // Extract just the size (no thread pitch) and add washer type
+        size_only = get_size_from_thread(thread);
+        washer_text = (type == "SAE washer") ? str(size_only, " SAE") :
+                      (type == "Standard washer") ? str(size_only, " Standard") :
+                      (type == "Lock washer") ? str(size_only, " Lock") : thread;
+        // Use custom_display_text if provided, otherwise use formatted washer text
+        final_text = (custom_display_text != "") ? custom_display_text : washer_text;
+        render_text(final_text);
+    } else if (is_nut_or_washer_type(type)) {
+        // Nuts: show full thread spec
+        render_hardware_icon(type, length_mm);
         render_text(display_text);
     } else {
         // Bolts and screws
@@ -275,8 +327,10 @@ module render_hardware_icon(type, length_mm) {
         lock_nut_icon(icon_y_pos);
     } else if (type == "Standard washer") {
         standard_washer_icon(icon_y_pos);
-    } else if (type == "Spring washer") {
-        spring_washer_icon(icon_y_pos);
+    } else if (type == "SAE washer") {
+        sae_washer_icon(icon_y_pos);
+    } else if (type == "Lock washer") {
+        lock_washer_icon(icon_y_pos);
     }
 }
 
@@ -627,17 +681,14 @@ module lock_nut_icon(y_pos) {
         }
     }
     
-    // Side view - slightly taller with rounded/domed top
+    // Side view - shows nylon insert at top
+    // Base hex portion
     translate([center_x + 1.5, y_pos - 2, z_pos]) {
-        cube([2.5, 4, text_height]);
+        cube([2, 4, text_height]);
     }
-    translate([center_x + 1.5, y_pos, z_pos]) {
-        linear_extrude(height = text_height) {
-            intersection() {
-                circle(d = 4, $fn = 32);
-                translate([0, -2]) square([3, 4]);
-            }
-        }
+    // Nylon insert portion (slightly narrower, at top)
+    translate([center_x + 3.5, y_pos - 1.5, z_pos]) {
+        cube([1.5, 3, text_height]);
     }
 }
 
@@ -659,7 +710,25 @@ module standard_washer_icon(y_pos) {
     }
 }
 
-module spring_washer_icon(y_pos) {
+module sae_washer_icon(y_pos) {
+    z_pos = label_thickness;
+    center_x = 0;
+    
+    // Top view - simple ring shape with smooth circles (same as standard)
+    translate([center_x - 1, y_pos, z_pos]) {
+        difference() {
+            cylinder(h = text_height, d = 4, $fn = 32);  // Smooth outer circle
+            cylinder(h = text_height, d = 2.5, $fn = 32);  // Smooth inner hole
+        }
+    }
+    
+    // Side view - thicker rectangular profile for SAE
+    translate([center_x + 1.5, y_pos - 2, z_pos]) {
+        cube([1.5, 4, text_height]);  // 2x thickness compared to standard washer
+    }
+}
+
+module lock_washer_icon(y_pos) {
     z_pos = label_thickness;
     center_x = 0;
     
@@ -667,7 +736,7 @@ module spring_washer_icon(y_pos) {
         difference() {
             cylinder(h = text_height, d = 4, $fn = 32);  // Smooth outer circle
             cylinder(h = text_height, d = 2.5, $fn = 32);  // Smooth inner hole
-            translate([0, -0.3, 0]) cube([4, 0.6, text_height]);  // Gap for spring
+            translate([0, -0.3, 0]) cube([4, 0.6, text_height]);  // Gap for lock/spring
         }
     }
     
