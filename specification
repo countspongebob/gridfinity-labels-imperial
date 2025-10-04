@@ -1,9 +1,9 @@
-# 3D Printable Parts Bin Label Generator - IMPERIAL SPECIFICATION v22
+# 3D Printable Parts Bin Label Generator - IMPERIAL SPECIFICATION v28
 
 ## AI Assistant Implementation Guide (READ FIRST)
 
 **CRITICAL CONTEXT FOR AI ASSISTANTS:**
-You are working with version 22 of a mature, production-tested OpenSCAD label generator. This code has undergone extensive debugging and optimization. Many "obvious improvements" have already been tried and either failed or caused subtle issues.
+You are working with version 28 of a mature, production-tested OpenSCAD label generator. This code has undergone extensive debugging and optimization. Many "obvious improvements" have already been tried and either failed or caused subtle issues.
 
 **BEFORE MAKING ANY CHANGES:**
 1. Read the entire "Implementation Notes and Lessons Learned" section at the end of this document
@@ -37,7 +37,7 @@ A parametric OpenSCAD-based system for generating customizable 3D printable sing
 ## Core Requirements
 
 ### 1. Label Physical Specifications
-- **Base Dimensions**: Configurable length based on units (1-3 units: 37.8mm, 79.6mm, 113.4mm), fixed width 11.7mm
+- **Base Dimensions**: Configurable length based on units (1-3 units: 37.8mm, 77.4mm, 113.4mm), fixed width 11.7mm
 - **Height**: 0.8mm base with 0.3mm raised text/icons (or 0.01mm flush text)
 - **Material**: Single or dual-color 3D printing support
 - **Mounting**: Clean solid base with optional side retention tabs
@@ -76,8 +76,10 @@ A parametric OpenSCAD-based system for generating customizable 3D printable sing
 
 ### 3. Fractional Length System
 **Dropdown Interface**: User selects from predefined fractional lengths
-- **1/4" to 2"**: Increments of 1/16" (1/4, 5/16, 3/8, 7/16, 1/2, 9/16, 5/8, 11/16, 3/4, 13/16, 7/8, 15/16, 1, 1-1/16, 1-1/8, 1-3/16, 1-1/4, 1-5/16, 1-3/8, 1-7/16, 1-1/2, 1-9/16, 1-5/8, 1-11/16, 1-3/4, 1-13/16, 1-7/8, 1-15/16, 2)
-- **Total**: 29 fractional options covering comprehensive fastener length range
+- **1/4" to 2"**: Increments of 1/16" (29 options)
+- **2-1/4" to 8"**: Increments of 1/4" (24 options)
+- **Total**: 53 fractional options covering comprehensive fastener length range
+- **Complete list**: 1/4, 5/16, 3/8, 7/16, 1/2, 9/16, 5/8, 11/16, 3/4, 13/16, 7/8, 15/16, 1, 1-1/16, 1-1/8, 1-3/16, 1-1/4, 1-5/16, 1-3/8, 1-7/16, 1-1/2, 1-9/16, 1-5/8, 1-11/16, 1-3/4, 1-13/16, 1-7/8, 1-15/16, 2, 2-1/4, 2-1/2, 2-3/4, 3, 3-1/4, 3-1/2, 3-3/4, 4, 4-1/4, 4-1/2, 4-3/4, 5, 5-1/4, 5-1/2, 5-3/4, 6, 6-1/4, 6-1/2, 6-3/4, 7, 7-1/4, 7-1/2, 7-3/4, 8
 
 ### 4. Hardware Component Types
 **Bolts & Screws**:
@@ -88,17 +90,17 @@ A parametric OpenSCAD-based system for generating customizable 3D printable sing
 
 **Fasteners**:
 - Standard nuts, Lock nuts
-- Standard washers, Spring washers
+- Standard washers, SAE washers, Lock washers
 
 ### 5. Batch All Sizes Generation
 **Scope**: System can generate complete sets of labels for one hardware type and thread specification across all available lengths
 - **Interface**: Toggle to enable batch mode with separate hardware type and thread specification dropdowns
 - **Responsive Grid Layout**: Column count adapts to label size to optimize print bed usage
   - Small labels (37.8mm): 6 columns
-  - Medium labels (79.6mm): 3 columns  
+  - Medium labels (77.4mm): 3 columns  
   - Large labels (113.4mm): 2 columns
 - **Spacing**: Minimal 1mm gaps between labels to reduce material waste
-- **Coverage**: Automatically generates all 29 fractional lengths (1/4" through 2" in 1/16" increments)
+- **Coverage**: Automatically generates all 53 fractional lengths (1/4" through 8")
 - **Use Case**: Perfect for creating complete label sets for commonly used fastener types (e.g., all sizes of #4-40 Phillips bolts)
 
 ### 6. Display Text Generation
@@ -124,7 +126,9 @@ display_text = str(thread_spec, " x ", length_fraction)
 - No quotation marks in printed output (`"` symbols prohibited)
 - Machine screws: `#8-32 x 1/2`
 - Fractional: `1/4-20 x 3/4`
-- Nuts/washers: Thread specification only (`#8-32`, `1/4-20`) or custom text
+- Nuts: Full thread specification (`#8-32`, `1/4-20`)
+- Washers: Size + type only (`3/4 SAE`, `1/4 Standard`, `#8 Lock`)
+  - Thread pitch removed for washers (show "3/4" not "3/4-10")
 
 ### 7. Icon Generation System
 **Dimensional Scaling**: Icons scale proportionally with length_mm converted from fractional inches
@@ -149,8 +153,9 @@ display_text = str(thread_spec, " x ", length_fraction)
   - Lock nut: Hexagonal with smooth circular hole ($fn=32 for hole)
 
 - **Special Icons**:
-  - Standard washer: Simple ring (smooth circles inside and out, $fn=32)
-  - Spring washer: Split ring (smooth circles with gap, $fn=32)
+  - Standard washer: Simple ring (smooth circles inside and out, $fn=32), thin side profile
+  - SAE washer: Simple ring (smooth circles, $fn=32), thick side profile (2x standard)
+  - Lock washer: Split ring (smooth circles with gap, $fn=32)
   - Wall anchor: Expansion pattern
   - Heat set insert: Knurled pattern indication
 
@@ -165,7 +170,7 @@ display_text = str(thread_spec, " x ", length_fraction)
 **Single Label Mode**:
 - `hardware_type`: Dropdown of all supported component types
 - `thread_spec`: Ordered dropdown (machine screws first, then fractional)
-- `length_fraction`: Dropdown of 29 fractional options (1/4" to 2")
+- `length_fraction`: Dropdown of 53 fractional options (1/4" to 8")
 - `custom_display_text`: Override field for custom text on any hardware type
 - `custom_text_only`: Text for "Custom text" hardware type (no icon)
 
@@ -175,7 +180,7 @@ display_text = str(thread_spec, " x ", length_fraction)
 - `batch_thread_spec`: Thread selection for batch
 
 **Visual Properties**:
-- `label_units`: Size selection (1=Small 37.8mm, 2=Medium 79.6mm, 3=Large 113.4mm)
+- `label_units`: Size selection (1=Small 37.8mm, 2=Medium 77.4mm, 3=Large 113.4mm)
 - `base_color`: Default white (#FFFFFF), user configurable
 - `content_color`: Default black (#000000), user configurable
 - `export_mode`: Complete, Base only, or Content only
@@ -251,7 +256,7 @@ label_content(type, thread, display_text, length_mm) // Handles all content rend
 
 **Validation Requirements**:
 - Verify fractional dropdown values convert correctly to millimeters
-- Test that all 29 length options generate proper display text
+- Test that all 53 length options generate proper display text
 - Confirm thread specification ordering in dropdown
 - Validate icon scaling across full length range
 - Ensure clean base geometry without holes
@@ -372,7 +377,7 @@ These function names are preserved to maintain code stability.
 ### Dimensional Discrepancies
 - Label width: Code uses 11.7mm (measured/tested value) vs 11.5mm in original spec
 - Both values work, but 11.7mm provides better text spacing
-- The 37.8mm/79.6mm/113.4mm lengths are precisely calibrated for label maker tapes
+- The 37.8mm/77.4mm/113.4mm lengths are precisely calibrated for label maker tapes
 
 ### Testing Checklist for Future Modifications
 
@@ -382,7 +387,7 @@ Before accepting any icon changes, verify:
 3. **Custom text flow**: Test with empty and filled custom_display_text
 4. **Nuts/washers**: Verify they show thread spec when custom text is empty
 5. **Long bolts**: Check that stems extend continuously to max_length (no gaps)
-6. **Batch generation**: Ensure all 29 sizes generate correctly
+6. **Batch generation**: Ensure all 53 sizes generate correctly
 
 ### Common Mistakes to Avoid
 
