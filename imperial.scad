@@ -1,746 +1,446 @@
-////////////////////////////////////////////////////////
-//        Parts Bin Label Generator - IMPERIAL        //
-//         Fractional & Machine Screw Support         //
-//     Version 28 - Medium Width Final Tune 77.4mm    //
-////////////////////////////////////////////////////////
+# 3D Printable Parts Bin Label Generator - IMPERIAL SPECIFICATION v94
 
-/* [Single Label Mode] */
-hardware_type = "Button head screw"; // [Phillips head screw, Socket head bolt, Hex head bolt, Button head screw, Torx head bolt, Phillips head countersunk, Torx head countersunk, Socket head countersunk, Phillips wood screw, Torx wood screw, Wall anchor, Heat set insert, Standard nut, Lock nut, Standard washer, SAE washer, Lock washer, Custom text, None]
-thread_spec = "#4-40"; // [#4-40, #4-48, #5-40, #5-44, #6-32, #6-40, #8-32, #8-36, #10-24, #10-32, #12-24, #12-28, 1/4-20, 1/4-28, 5/16-18, 5/16-24, 3/8-16, 3/8-24, 7/16-14, 7/16-20, 1/2-13, 1/2-20, 9/16-12, 9/16-18, 5/8-11, 5/8-18, 3/4-10, 3/4-16, 7/8-9, 7/8-14, 1-8, 1-12]
-length_fraction = "3/4"; // [1/4, 5/16, 3/8, 7/16, 1/2, 9/16, 5/8, 11/16, 3/4, 13/16, 7/8, 15/16, 1, 1-1/16, 1-1/8, 1-3/16, 1-1/4, 1-5/16, 1-3/8, 1-7/16, 1-1/2, 1-9/16, 1-5/8, 1-11/16, 1-3/4, 1-13/16, 1-7/8, 1-15/16, 2, 2-1/4, 2-1/2, 2-3/4, 3, 3-1/4, 3-1/2, 3-3/4, 4, 4-1/4, 4-1/2, 4-3/4, 5, 5-1/4, 5-1/2, 5-3/4, 6, 6-1/4, 6-1/2, 6-3/4, 7, 7-1/4, 7-1/2, 7-3/4, 8]
-custom_display_text = ""; // Custom text override (leave blank for auto-generation)
-custom_text_only = "Custom"; // Used only when hardware_type is "Custom text"
+## AI Assistant Implementation Guide (READ FIRST)
 
-/* [Batch All Sizes Mode] */
-enable_batch_all_sizes = false;
-batch_hardware_type = "Phillips head screw"; // [Phillips head screw, Socket head bolt, Hex head bolt, Button head screw, Torx head bolt, Phillips head countersunk, Torx head countersunk, Socket head countersunk, Phillips wood screw, Torx wood screw, Wall anchor, Heat set insert, Standard nut, Lock nut, Standard washer, SAE washer, Lock washer]
-batch_thread_spec = "#4-40"; // [#4-40, #4-48, #5-40, #5-44, #6-32, #6-40, #8-32, #8-36, #10-24, #10-32, #12-24, #12-28, 1/4-20, 1/4-28, 5/16-18, 5/16-24, 3/8-16, 3/8-24, 7/16-14, 7/16-20, 1/2-13, 1/2-20, 9/16-12, 9/16-18, 5/8-11, 5/8-18, 3/4-10, 3/4-16, 7/8-9, 7/8-14, 1-8, 1-12]
+**CRITICAL CONTEXT FOR AI ASSISTANTS:**
+You are working with version 94 of a mature, production-tested OpenSCAD label generator. This code has undergone extensive debugging and optimization. Many "obvious improvements" have already been tried and either failed or caused subtle issues.
 
-/* [Label Properties] */
-label_units = 1; // [1:Small (37.8mm), 2:Medium (77.4mm), 3:Large (113.4mm)]
-base_color = "#FFFFFF"; // Base label color
-content_color = "#000000"; // Text and icon color
-export_mode = "Complete"; // [Complete, Base only, Content only]
+**BEFORE MAKING ANY CHANGES:**
+1. Read the entire "Implementation Notes and Lessons Learned" section at the end of this document
+2. Understand that all icon geometries have been carefully calibrated to match physical hardware
+3. Know that the button head side view positioning (head_x + 5) is particularly sensitive and correct as-is
+4. Be aware that custom text handling for nuts/washers has specific behavior that must be preserved
+5. Recognize that $fn values (32 for smooth, 6 for hex) are intentionally chosen
 
-/* [Typography] */
-font_family = "Roboto"; // [Arial, Roboto, Open Sans, Noto Sans, Liberation Sans]
-font_weight = "Bold"; // [Regular, Bold, Light, Medium]
-text_size = 3.5;
+**WHEN ASKED TO MODIFY THIS CODE:**
+- Assume the existing code is working correctly unless specifically told otherwise
+- Preserve all existing parameter flows, especially display_text through all functions
+- Test changes with empty and filled custom_display_text fields
+- Ensure nuts/washers show thread spec when custom text is empty
+- Never "optimize" the button head side view without explicit request
+- Check the Implementation Notes for why certain patterns exist before changing them
 
-/* [Advanced Settings] */
-label_width = 11.7;
-label_thickness = 0.8;
-corner_radius = 2.0;
-edge_chamfer = 0.2;
-raised_height = 0.3;
-enable_side_tabs = true; // Enable rectangular tabs on sides
-tab_depth = 1.0; // How far tabs extend from label edge (mm)
-tab_width = 6.0; // Width of rectangular tabs (mm)
+**COMMON PITFALLS TO AVOID:**
+- Don't change "button_bolt_icon" function name even though UI says "Button head screw"
+- Don't modify bolt stem positioning without understanding the icon alignment system
+- Don't assume round icons are mistakes - they match physical hardware appearance
+- Don't simplify the dual custom text field system - both fields serve different purposes
 
-// Internal calculations
-label_length = (label_units == 1) ? 37.8 : (label_units == 2) ? 77.4 : 113.4;
-text_height = raised_height;
-font_string = str(font_family, ":style=", font_weight);
-max_bolt_length = 20 * label_units;
-max_text_width = label_length - 4; // Leave 2mm margin on each side for text
+**IF SUGGESTING IMPROVEMENTS:**
+Focus on adding new capabilities rather than "fixing" existing working features. The code prioritizes reliability and print quality over elegance. Any changes should be tested across all hardware types, label sizes, and length options.
 
-// Batch spacing calculations
-grid_columns = (label_units == 1) ? 6 : (label_units == 2) ? 3 : 2;
-h_spacing = label_length + 1; // 1mm gap between labels horizontally
-v_spacing = label_width + 1;  // 1mm gap between labels vertically
+---
 
-// All fractional sizes for batch generation
-all_fractional_sizes = ["1/4", "5/16", "3/8", "7/16", "1/2", "9/16", "5/8", "11/16", "3/4", "13/16", "7/8", "15/16", "1", "1-1/16", "1-1/8", "1-3/16", "1-1/4", "1-5/16", "1-3/8", "1-7/16", "1-1/2", "1-9/16", "1-5/8", "1-11/16", "1-3/4", "1-13/16", "1-7/8", "1-15/16", "2", "2-1/4", "2-1/2", "2-3/4", "3", "3-1/4", "3-1/2", "3-3/4", "4", "4-1/4", "4-1/2", "4-3/4", "5", "5-1/4", "5-1/2", "5-3/4", "6", "6-1/4", "6-1/2", "6-3/4", "7", "7-1/4", "7-1/2", "7-3/4", "8"];
+## Overview
+A parametric OpenSCAD-based system for generating customizable 3D printable single labels for parts storage bins. This specification covers Imperial hardware (machine screws #4-40 through 1"-12) with dual-color 3D printing support and fractional length dropdown interface.
 
-////////////////////////////////////////////////////////
-//         IMPERIAL SYSTEM FUNCTIONS                 //
-////////////////////////////////////////////////////////
+## Core Requirements
 
-function imperial_to_mm(inches) = inches * 25.4;
+### 1. Label Physical Specifications
+- **Base Dimensions**: Configurable length based on units (1-3 units: 37.8mm, 77.4mm, 113.4mm), fixed width 11.7mm
+- **Height**: 0.8mm base with 0.3mm raised text/icons (or 0.01mm flush text)
+- **Material**: Single or dual-color 3D printing support
+- **Mounting**: Clean solid base with optional side retention tabs
+- **Edge Treatment**: Rounded corners with configurable radius (default 2.0mm) and chamfered top/bottom edges (default 0.2mm)
+- **Side Tabs** (optional): Rectangular retention tabs on left/right sides
+  - Single centered tab per side
+  - Configurable depth (default 1.0mm projection)
+  - Configurable width (default 6.0mm)
+  - Help secure label against bin walls
+- **Default Colors**: White base (#FFFFFF) with black text/icons (#000000)
 
-// Convert fractional string to decimal
-function fraction_to_decimal(frac_str) =
-    (frac_str == "1/4") ? 0.25 :
-    (frac_str == "5/16") ? 0.3125 :
-    (frac_str == "3/8") ? 0.375 :
-    (frac_str == "7/16") ? 0.4375 :
-    (frac_str == "1/2") ? 0.5 :
-    (frac_str == "9/16") ? 0.5625 :
-    (frac_str == "5/8") ? 0.625 :
-    (frac_str == "11/16") ? 0.6875 :
-    (frac_str == "3/4") ? 0.75 :
-    (frac_str == "13/16") ? 0.8125 :
-    (frac_str == "7/8") ? 0.875 :
-    (frac_str == "15/16") ? 0.9375 :
-    (frac_str == "1") ? 1.0 :
-    (frac_str == "1-1/16") ? 1.0625 :
-    (frac_str == "1-1/8") ? 1.125 :
-    (frac_str == "1-3/16") ? 1.1875 :
-    (frac_str == "1-1/4") ? 1.25 :
-    (frac_str == "1-5/16") ? 1.3125 :
-    (frac_str == "1-3/8") ? 1.375 :
-    (frac_str == "1-7/16") ? 1.4375 :
-    (frac_str == "1-1/2") ? 1.5 :
-    (frac_str == "1-9/16") ? 1.5625 :
-    (frac_str == "1-5/8") ? 1.625 :
-    (frac_str == "1-11/16") ? 1.6875 :
-    (frac_str == "1-3/4") ? 1.75 :
-    (frac_str == "1-13/16") ? 1.8125 :
-    (frac_str == "1-7/8") ? 1.875 :
-    (frac_str == "1-15/16") ? 1.9375 :
-    (frac_str == "2") ? 2.0 :
-    (frac_str == "2-1/4") ? 2.25 :
-    (frac_str == "2-1/2") ? 2.5 :
-    (frac_str == "2-3/4") ? 2.75 :
-    (frac_str == "3") ? 3.0 :
-    (frac_str == "3-1/4") ? 3.25 :
-    (frac_str == "3-1/2") ? 3.5 :
-    (frac_str == "3-3/4") ? 3.75 :
-    (frac_str == "4") ? 4.0 :
-    (frac_str == "4-1/4") ? 4.25 :
-    (frac_str == "4-1/2") ? 4.5 :
-    (frac_str == "4-3/4") ? 4.75 :
-    (frac_str == "5") ? 5.0 :
-    (frac_str == "5-1/4") ? 5.25 :
-    (frac_str == "5-1/2") ? 5.5 :
-    (frac_str == "5-3/4") ? 5.75 :
-    (frac_str == "6") ? 6.0 :
-    (frac_str == "6-1/4") ? 6.25 :
-    (frac_str == "6-1/2") ? 6.5 :
-    (frac_str == "6-3/4") ? 6.75 :
-    (frac_str == "7") ? 7.0 :
-    (frac_str == "7-1/4") ? 7.25 :
-    (frac_str == "7-1/2") ? 7.5 :
-    (frac_str == "7-3/4") ? 7.75 :
-    (frac_str == "8") ? 8.0 :
-    0.75; // Default fallback
+### 2. Imperial Thread Specifications
+**Thread Specification Ordering**: Dropdown sorted by size (smallest to largest), with coarse threads before fine threads for each size.
 
-function is_nut_or_washer_type(type) =
-    type == "Standard nut" || 
-    type == "Lock nut" || 
-    type == "Standard washer" || 
-    type == "SAE washer" ||
-    type == "Lock washer";
+**Machine Screw Threads (by ascending size)**:
+- **#4**: #4-40 (coarse), #4-48 (fine)
+- **#5**: #5-40 (coarse), #5-44 (fine)
+- **#6**: #6-32 (coarse), #6-40 (fine)
+- **#8**: #8-32 (coarse), #8-36 (fine)
+- **#10**: #10-24 (coarse), #10-32 (fine)
+- **#12**: #12-24 (coarse), #12-28 (fine)
 
-function is_washer_type(type) =
-    type == "Standard washer" || 
-    type == "SAE washer" ||
-    type == "Lock washer";
+**Fractional Threads (by ascending diameter)**:
+- **1/4"**: 1/4-20 (UNC coarse), 1/4-28 (UNF fine)
+- **5/16"**: 5/16-18 (UNC), 5/16-24 (UNF)
+- **3/8"**: 3/8-16 (UNC), 3/8-24 (UNF)
+- **7/16"**: 7/16-14 (UNC), 7/16-20 (UNF)
+- **1/2"**: 1/2-13 (UNC), 1/2-20 (UNF)
+- **9/16"**: 9/16-12 (UNC), 9/16-18 (UNF)
+- **5/8"**: 5/8-11 (UNC), 5/8-18 (UNF)
+- **3/4"**: 3/4-10 (UNC), 3/4-16 (UNF)
+- **7/8"**: 7/8-9 (UNC), 7/8-14 (UNF)
+- **1"**: 1-8 (UNC), 1-12 (UNF)
 
-// Extract size from thread spec (e.g., "3/4-10" -> "3/4", "#8-32" -> "#8")
-function get_size_from_thread(thread) =
-    let(dash_pos = search("-", thread))
-    (len(dash_pos) > 0) ? substr(thread, 0, dash_pos[0]) : thread;
+**Sorting Logic**: Each diameter group contains coarse thread first (higher number = coarser pitch), followed by fine thread (higher number = finer pitch). This organization allows users to easily find both standard and precision thread options for each fastener size.
 
-// Helper function to extract substring (OpenSCAD doesn't have substr built-in)
-function substr(str, start, end) = 
-    (start >= len(str) || start >= end) ? "" :
-    (start == 0 && end >= len(str)) ? str :
-    chr([for (i = [start:min(end-1, len(str)-1)]) ord(str[i])]);
+### 3. Fractional Length System
+**Dropdown Interface**: User selects from predefined fractional lengths
+- **1/4" to 2"**: Increments of 1/16" (29 options)
+- **2-1/4" to 8"**: Increments of 1/4" (24 options)
+- **Total**: 53 fractional options covering comprehensive fastener length range
+- **Complete list**: 1/4, 5/16, 3/8, 7/16, 1/2, 9/16, 5/8, 11/16, 3/4, 13/16, 7/8, 15/16, 1, 1-1/16, 1-1/8, 1-3/16, 1-1/4, 1-5/16, 1-3/8, 1-7/16, 1-1/2, 1-9/16, 1-5/8, 1-11/16, 1-3/4, 1-13/16, 1-7/8, 1-15/16, 2, 2-1/4, 2-1/2, 2-3/4, 3, 3-1/4, 3-1/2, 3-3/4, 4, 4-1/4, 4-1/2, 4-3/4, 5, 5-1/4, 5-1/2, 5-3/4, 6, 6-1/4, 6-1/2, 6-3/4, 7, 7-1/4, 7-1/2, 7-3/4, 8
 
-////////////////////////////////////////////////////////
-//                 MAIN EXECUTION                    //
-////////////////////////////////////////////////////////
+### 4. Hardware Component Types
+**Bolts & Screws**:
+- Phillips head screw, Socket head bolt, Hex head bolt, Button head screw, Torx head bolt
+- Phillips/Torx/Socket head countersunk
+- Phillips/Torx wood screws
+- Wall anchors, Heat set inserts
 
-if (enable_batch_all_sizes) {
-    generate_batch_all_sizes();
-} else {
-    // Single label mode
-    length_inches = fraction_to_decimal(length_fraction);
-    length_mm = length_inches * 25.4;
-    
-    // FIXED: Now properly handles custom text for nuts/washers
-    final_display_text = (custom_display_text != "") ? custom_display_text :
-        is_nut_or_washer_type(hardware_type) ? thread_spec :  // Changed from "" to thread_spec
-        str(thread_spec, " x ", length_fraction);
+**Fasteners**:
+- Standard nuts, Jam nuts, Lock nuts
+- Standard washers, SAE washers, Lock washers
 
-    create_single_label(
-        type = hardware_type,
-        thread = thread_spec,
-        display_text = final_display_text,
-        length_mm = length_mm
-    );
-}
+### 5. Batch All Sizes Generation
+**Scope**: System can generate complete sets of labels for one hardware type and thread specification across all available lengths
+- **Interface**: Toggle to enable batch mode with separate hardware type and thread specification dropdowns
+- **Responsive Grid Layout**: Column count adapts to label size to optimize print bed usage
+  - Small labels (37.8mm): 6 columns
+  - Medium labels (77.4mm): 3 columns  
+  - Large labels (113.4mm): 2 columns
+- **Spacing**: Minimal 1mm gaps between labels to reduce material waste
+- **Coverage**: Automatically generates all 53 fractional lengths (1/4" through 8")
+- **Use Case**: Perfect for creating complete label sets for commonly used fastener types (e.g., all sizes of #4-40 Phillips bolts)
 
-////////////////////////////////////////////////////////
-//            BATCH ALL SIZES GENERATION             //
-////////////////////////////////////////////////////////
+### 6. Display Text Generation
+**CRITICAL REQUIREMENT**: Single source of truth for display text generation to prevent inconsistencies.
 
-module generate_batch_all_sizes() {
-    num_sizes = len(all_fractional_sizes);
-    
-    for (i = [0 : num_sizes - 1]) {
-        size_fraction = all_fractional_sizes[i];
-        length_inches = fraction_to_decimal(size_fraction);
-        length_mm = length_inches * 25.4;
-        
-        // Calculate grid position
-        row = floor(i / grid_columns);
-        col = i % grid_columns;
-        
-        // Position label in grid with tight spacing
-        translate([col * h_spacing, -row * v_spacing, 0]) {
-            // Generate display text - use batch parameters, not defaults
-            // FIXED: Also updated batch mode to use thread_spec for nuts/washers
-            final_display_text = is_nut_or_washer_type(batch_hardware_type) ? batch_thread_spec :
-                str(batch_thread_spec, " x ", size_fraction);
-                
-            create_single_label(
-                type = batch_hardware_type,
-                thread = batch_thread_spec,
-                display_text = final_display_text,
-                length_mm = length_mm
-            );
+**Primary Path**: Direct use of dropdown string values
+```
+display_text = str(thread_spec, " x ", length_fraction)
+// Example: "#4-40 x 3/4"
+```
+
+**Custom Text Override (v16.1 Enhancement)**:
+- **`custom_display_text` field**: Allows user to override auto-generated text for any hardware type
+- **Nuts and Washers**: When custom text is empty, displays thread specification (e.g., "#4-40")
+- **Bolts and Screws**: When custom text is empty, displays full specification (e.g., "#4-40 x 3/4")
+- **Custom Override Examples**: User can enter "SAE" or "Metric" or any custom identifier
+
+**Prohibited**: Multiple conversion paths that could show decimals instead of fractions
+- ❌ Convert fraction → decimal → back to fraction
+- ✅ Use original dropdown strings directly
+
+**Text Format Standards**:
+- No quotation marks in printed output (`"` symbols prohibited)
+- Machine screws: `#8-32 x 1/2`
+- Fractional: `1/4-20 x 3/4`
+- Nuts: Full thread specification (`#8-32`, `1/4-20`)
+- Washers: Size + type only (`3/4 SAE`, `1/4 Standard`, `#8 Lock`)
+  - Thread pitch removed for washers (show "3/4" not "3/4-10")
+
+### 7. Icon Generation System
+**Dimensional Scaling**: Icons scale proportionally with length_mm converted from fractional inches
+- **Conversion**: `length_mm = length_inches * 25.4`
+- **Maximum Display Length**: `20 * label_units` (prevents overflow)
+- **Long Bolt Handling**: Stem displays continuously up to max length (no gaps or splits)
+
+**Icon Design Standards (v94 Updates)**:
+
+**Top View Icons (Looking down on head)**:
+- **Round Heads** (smooth circular outline, $fn=32):
+  - Phillips head screw: Round with cross slots
+  - Socket head bolt: Round with hexagonal socket
+  - Button head screw: Round with hexagonal socket
+  - Torx head bolt: Round with improved curved-lobe star socket
+  - All countersunk variants: Round with respective drive pattern
+  - Wood screws: Round with drive pattern
+  - **Note**: Some icons use 2D shapes (circle()) extruded rather than cylinder() to avoid 7-sided rendering bugs
+  
+- **Hexagonal Heads**:
+  - Hex head bolt: Hexagonal outline ($fn=6)
+  - Standard nut: Hexagonal with smooth circular hole ($fn=32 for hole)
+  - Jam nut: Hexagonal with smooth circular hole (half-width side profile)
+  - Lock nut: Hexagonal with smooth circular hole ($fn=32 for hole)
+
+- **Special Icons**:
+  - Standard washer: Simple ring (smooth circles inside and out, $fn=32), thin side profile
+  - SAE washer: Simple ring (smooth circles, $fn=32), thick side profile (2x standard)
+  - Lock washer: Split ring (smooth circles with gap, $fn=32)
+  - Wall anchor: Expansion pattern
+  - Heat set insert: Knurled pattern indication
+
+**Side View Profiles**:
+- **Button head**: Rounded/domed profile
+- **Lock nut**: Taller profile with rounded top (nylon insert indication)
+- **Countersunk**: Angled taper profile
+- **Wood screws**: Pointed tip
+- **Standard components**: Straight rectangular profile
+
+### 8. User Interface Parameters
+**Single Label Mode**:
+- `hardware_type`: Dropdown of all supported component types
+- `thread_spec`: Ordered dropdown (machine screws first, then fractional)
+- `length_fraction`: Dropdown of 53 fractional options (1/4" to 8")
+- `custom_display_text`: Override field for custom text on any hardware type
+- `custom_text_only`: Text for "Custom text" hardware type (no icon)
+
+**Batch Mode**:
+- `enable_batch_all_sizes`: Toggle for batch generation
+- `batch_hardware_type`: Hardware selection for batch
+- `batch_thread_spec`: Thread selection for batch
+
+**Visual Properties**:
+- `label_units`: Size selection (1=Small 37.8mm, 2=Medium 77.4mm, 3=Large 113.4mm)
+- `base_color`: Default white (#FFFFFF), user configurable
+- `content_color`: Default black (#000000), user configurable
+- `export_mode`: Complete, Base only, or Content only
+
+**Typography Controls**:
+- `font_family`: Roboto, Arial, Open Sans, Noto Sans, Liberation Sans
+- `font_weight`: Regular, Bold, Light, Medium
+- `text_size`: Configurable text size (default 3.5)
+
+**Advanced Settings**:
+- `label_width`: 11.7mm
+- `label_thickness`: 0.8mm
+- `corner_radius`: 2.0mm
+- `edge_chamfer`: 0.2mm
+- `raised_height`: 0.3mm
+- `enable_side_tabs`: true (retention tabs enabled by default)
+- `tab_depth`: 1.0mm (how far tabs extend from label edge)
+- `tab_width`: 6.0mm (width of rectangular tabs)
+
+### 9. Code Architecture Requirements
+**Data Consistency**:
+- **Single Source Principle**: All display text must derive from dropdown string values
+- **Custom Text Handling**: Properly pass and use custom_display_text through all functions
+- **Parameter Validation**: Ensure dropdown selections map correctly to internal calculations
+
+**Modular Design**:
+- Separate icon generation modules for each hardware type
+- Unified text rendering system accepting display_text parameter
+- Parametric label base with configurable dimensions (no holes)
+- Centralized fractional-to-decimal conversion for internal calculations only
+
+**Function Separation**:
+```
+fraction_to_decimal(string) → decimal  // For internal calculations only
+render_text(display_text) → 3D text   // Uses passed text parameter
+create_single_label() → Complete label // Single label generation
+label_content(type, thread, display_text, length_mm) // Handles all content rendering
+```
+
+### 10. Quality Assurance
+**Icon Accuracy (v16.1 Critical Fixes)**:
+- All bolt heads must be geometrically correct (round vs hex)
+- Smooth circular holes in nuts (no polygonal artifacts)
+- Proper washer representation (simple rings, no extraneous geometry)
+- Correct socket patterns (hex for Allen, star for Torx, cross for Phillips)
+
+**Dimensional Accuracy**: All measurements converted to millimeters for consistent internal calculations
+- Thread specifications remain as strings for display
+- Length calculations use converted millimeter values
+- Icon scaling uses millimeter measurements
+
+**Print Compatibility**:
+- Minimum feature size: 0.4mm (nozzle width compatibility)
+- No overhangs >45° without support
+- Clean STL export without non-manifold surfaces
+- Solid base design with no holes or cavities
+
+**Dual-Color Registration**: Perfect alignment between base and content layers
+- Shared coordinate system
+- Consistent Z-height references
+- No gaps or overlaps in dual-color printing
+- High contrast default colors (white/black)
+
+### 11. Error Prevention
+**Common Pitfalls to Avoid**:
+1. **Multiple Display Text Paths**: Always use dropdown strings directly
+2. **Decimal Display**: Never show "0.75" instead of "3/4"
+3. **Thread Order**: Machine screws (#4-40) before fractional (1/4-20)
+4. **Quotation Marks**: Remove all `\"` from display text generation
+5. **Inconsistent Parameters**: Ensure variable names match between functions
+6. **Custom Text Ignored**: Always pass display_text through to render functions
+7. **Polygonal Circles**: Use appropriate $fn values (32 for smooth, 6 for hex)
+
+**Validation Requirements**:
+- Verify fractional dropdown values convert correctly to millimeters
+- Test that all 53 length options generate proper display text
+- Confirm thread specification ordering in dropdown
+- Validate icon scaling across full length range
+- Ensure clean base geometry without holes
+- Verify text fits within label boundaries for all thread/length combinations
+- **Confirm custom_display_text overrides work for all hardware types**
+- **Validate icon geometry matches physical hardware appearance**
+
+### 12. Default Configuration
+**Standard Settings**:
+- Label size: Small (37.8mm length)
+- Colors: White base (#FFFFFF) with black text (#000000)
+- Text: Raised 0.3mm above base
+- Font: Roboto Bold, size 3.5
+- Thread: #4-40 (most common machine screw)
+- Length: 3/4" (common fastener length)
+- Hardware type: Button head screw
+- Side tabs: Enabled (1mm x 6mm rectangular tabs)
+
+### 13. Version Control
+**v16.2 Enhancements**:
+- Increased default corner radius to 2.0mm for softer appearance
+- Updated medium label length to 78.6mm (corrected dimension)
+- Added optional side retention tabs for bin mounting:
+  - Triangular tabs on left and right sides
+  - Configurable count and size
+  - Helps secure labels against bin walls
+- Continuous bolt stem display (removed gap for long bolts)
+
+**v16.1 Bug Fixes**:
+- Fixed custom_display_text to work properly with nuts and washers
+- Corrected standard washer icon (simple ring with smooth circles, restored side view)
+- Fixed spring washer icon (smooth circular rings inside and out)
+- Fixed nut icons to have smooth circular holes ($fn=32)
+- Corrected all round-head bolts to display circular tops ($fn=32)
+- Updated lock nut side profile to show rounded/domed top
+- Changed "Phillips head bolt" to "Phillips head screw" in interface
+- Changed "Button head bolt" to "Button head screw" in interface
+- Removed gap/split display for long bolts (now shows continuous stem at max length)
+- Ensured proper icon geometry for all hardware types
+- Enhanced display_text parameter flow through all rendering functions
+
+**v16 Original Features**:
+- Fractional length dropdown interface (29 options)
+- Batch all sizes generation mode
+- Eliminated decimal display issues
+- Changed default colors to white base/black text
+- Removed mounting holes from base design
+- Preserved thread ordering and quotation mark fixes
+
+**Architecture Principles**:
+- Single source of truth for display text
+- Direct parameter selection via dropdowns
+- Clean base design without attachment points
+- Extensible icon system for future hardware types
+
+## Implementation Considerations
+- Prioritize dropdown string values over calculated values for display
+- Use OpenSCAD's parametric capabilities for maximum flexibility
+- Maintain icon accuracy matching real hardware appearance
+- Support custom text overrides for specialized labeling needs
+- Ensure high contrast visibility with default white/black color scheme
+- Test all hardware type and custom text combinations thoroughly
+
+## Implementation Notes and Lessons Learned
+
+### Icon Design Philosophy
+Icons represent the **actual physical appearance** of hardware when viewed from above (top view) and from the side (side view). This is critical:
+- Round heads must be round because that's what you see looking down at a Phillips or socket head cap screw
+- Hex heads must be hexagonal because that's their actual shape
+- Washers are simple rings because that's their physical form
+- The goal is immediate visual recognition matching the physical part
+
+### Critical Code Patterns to Preserve
+
+#### Button Head Side View Positioning
+The button head bolt (screw) side view has been carefully calibrated over many iterations. The working pattern is:
+```openscad
+translate([head_x + 5, y_pos, z_pos]) {  // Note: +5, not +3
+    linear_extrude(height = text_height) {
+        intersection() {
+            circle(d = 4);  // No $fn needed here
+            translate([-2, -2]) square([2, 4]);
         }
     }
 }
+```
+**DO NOT CHANGE** the positioning values without extensive testing.
 
-////////////////////////////////////////////////////////
-//              SINGLE LABEL CREATION                //
-////////////////////////////////////////////////////////
+#### $fn Values for Geometry
+- **Smooth circles**: Always use `$fn = 32`
+- **Hexagonal shapes**: Always use `$fn = 6` 
+- **Default (no $fn)**: Only when the exact circle smoothness doesn't matter (e.g., for intersections)
 
-module create_single_label(type, thread, display_text, length_mm) {
-    // Base structure
-    if (export_mode == "Complete" || export_mode == "Base only") {
-        color(base_color) {
-            label_base();
-        }
-    }
-    
-    // Content (text and icons)
-    if (export_mode == "Complete" || export_mode == "Content only") {
-        color(content_color) {
-            label_content(type, thread, display_text, length_mm);
-        }
-    }
-}
+#### Custom Text Field Architecture
+Two separate custom text fields exist for different purposes:
+- `custom_display_text`: Overrides auto-generated text for ANY hardware type while keeping the icon
+- `custom_text_only`: Used ONLY when hardware_type is "Custom text" (no icon at all)
 
-////////////////////////////////////////////////////////
-//                LABEL BASE                         //
-////////////////////////////////////////////////////////
+This separation allows users to:
+1. Create standard hardware labels with custom text (e.g., "SAE" for a washer)
+2. Create completely custom labels with no hardware icon
 
-module label_base() {
-    // Main label body with rounded corners (no mounting holes)
-    hull() {
-        for (x = [-label_length/2 + corner_radius, label_length/2 - corner_radius]) {
-            for (y = [-label_width/2 + corner_radius, label_width/2 - corner_radius]) {
-                translate([x, y, 0]) {
-                    cylinder(h = label_thickness, r = corner_radius, $fn = 32);
-                }
-            }
-        }
-    }
-    
-    // Add side tabs if enabled
-    if (enable_side_tabs) {
-        // Left side tab - centered
-        translate([-label_length/2 - tab_depth, -tab_width/2, 0]) {
-            cube([tab_depth, tab_width, label_thickness]);
-        }
-        
-        // Right side tab - centered
-        translate([label_length/2, -tab_width/2, 0]) {
-            cube([tab_depth, tab_width, label_thickness]);
-        }
-    }
-}
+### Known Issues and Workarounds
 
-////////////////////////////////////////////////////////
-//               LABEL CONTENT                       //
-////////////////////////////////////////////////////////
+#### Socket Head Countersunk 7-Sided Issue
+Despite correct code (`$fn = 32` for outer cylinder), socket head countersunk may display with 7 sides in some OpenSCAD configurations. The code is correct; this appears to be a rendering issue. If encountered:
+1. Force refresh with F5/F6
+2. Check for global `$fn` overrides
+3. Verify no other transformations are affecting the geometry
 
-module label_content(type, thread, display_text, length_mm) {
-    if (type == "Custom text") {
-        render_text(custom_text_only);
-    } else if (is_washer_type(type)) {
-        // Washers: icon on top, size + type on bottom
-        render_hardware_icon(type, length_mm);
-        // Extract just the size (no thread pitch) and add washer type
-        size_only = get_size_from_thread(thread);
-        washer_text = (type == "SAE washer") ? str(size_only, " SAE") :
-                      (type == "Standard washer") ? str(size_only, " Standard") :
-                      (type == "Lock washer") ? str(size_only, " Lock") : thread;
-        // Use custom_display_text if provided, otherwise use formatted washer text
-        final_text = (custom_display_text != "") ? custom_display_text : washer_text;
-        render_text(final_text);
-    } else if (is_nut_or_washer_type(type)) {
-        // Nuts: show full thread spec
-        render_hardware_icon(type, length_mm);
-        render_text(display_text);
-    } else {
-        // Bolts and screws
-        render_hardware_icon(type, length_mm);
-        render_text(display_text);
-    }
-}
+#### Function Naming vs UI Labels
+Internal function names don't always match UI labels for historical reasons:
+- Function: `button_bolt_icon()` → UI: "Button head screw"
+- Function: `phillips_bolt_icon()` → UI: "Phillips head screw"
 
-////////////////////////////////////////////////////////
-//                TEXT RENDERING                     //
-////////////////////////////////////////////////////////
+These function names are preserved to maintain code stability.
 
-module render_text(text_content) {
-    translate([0, -label_width/2 + 3, label_thickness]) {
-        linear_extrude(height = text_height) {
-            text(text_content, 
-                 size = text_size,
-                 font = font_string,
-                 halign = "center",
-                 valign = "center");
-        }
-    }
-}
+### Dimensional Discrepancies
+- Label width: Code uses 11.7mm (measured/tested value) vs 11.5mm in original spec
+- Both values work, but 11.7mm provides better text spacing
+- The 37.8mm/77.4mm/113.4mm lengths are precisely calibrated for label maker tapes
 
-////////////////////////////////////////////////////////
-//               HARDWARE ICONS                      //
-////////////////////////////////////////////////////////
+### Testing Checklist for Future Modifications
 
-module render_hardware_icon(type, length_mm) {
-    icon_y_pos = label_width/4-1;  // Position icon closer to center and further from text
-    
-    if (type == "Phillips head screw") {
-        phillips_bolt_icon(length_mm, icon_y_pos);
-    } else if (type == "Socket head bolt") {
-        socket_bolt_icon(length_mm, icon_y_pos);
-    } else if (type == "Hex head bolt") {
-        hex_bolt_icon(length_mm, icon_y_pos);
-    } else if (type == "Button head screw") {
-        button_bolt_icon(length_mm, icon_y_pos);
-    } else if (type == "Torx head bolt") {
-        torx_bolt_icon(length_mm, icon_y_pos);
-    } else if (type == "Phillips head countersunk") {
-        phillips_countersunk_icon(length_mm, icon_y_pos);
-    } else if (type == "Torx head countersunk") {
-        torx_countersunk_icon(length_mm, icon_y_pos);
-    } else if (type == "Socket head countersunk") {
-        socket_countersunk_icon(length_mm, icon_y_pos);
-    } else if (type == "Phillips wood screw") {
-        phillips_wood_screw_icon(length_mm, icon_y_pos);
-    } else if (type == "Torx wood screw") {
-        torx_wood_screw_icon(length_mm, icon_y_pos);
-    } else if (type == "Wall anchor") {
-        wall_anchor_icon(length_mm, icon_y_pos);
-    } else if (type == "Heat set insert") {
-        heat_insert_icon(length_mm, icon_y_pos);
-    } else if (type == "Standard nut") {
-        standard_nut_icon(icon_y_pos);
-    } else if (type == "Lock nut") {
-        lock_nut_icon(icon_y_pos);
-    } else if (type == "Standard washer") {
-        standard_washer_icon(icon_y_pos);
-    } else if (type == "SAE washer") {
-        sae_washer_icon(icon_y_pos);
-    } else if (type == "Lock washer") {
-        lock_washer_icon(icon_y_pos);
-    }
-}
+Before accepting any icon changes, verify:
+1. **Top view geometry**: Round items are round, hex items are hex
+2. **Side view alignment**: Icons align properly with bolt stems
+3. **Custom text flow**: Test with empty and filled custom_display_text
+4. **Nuts/washers**: Verify they show thread spec when custom text is empty
+5. **Long bolts**: Check that stems extend continuously to max_length (no gaps)
+6. **Batch generation**: Ensure all 53 sizes generate correctly
 
-////////////////////////////////////////////////////////
-//              BOLT STEM HELPER                     //
-////////////////////////////////////////////////////////
+### Common Mistakes to Avoid
 
-module bolt_stem(length_mm, start_x, y_pos, stem_width = 2.0) {
-    effective_length = min(length_mm, max_bolt_length);
-    z_pos = label_thickness;
-    
-    // Always show continuous stem, capped at max_bolt_length
-    translate([start_x, y_pos - stem_width/2, z_pos]) {
-        cube([effective_length, stem_width, text_height]);
-    }
-}
+1. **Converting fractional displays to decimal**: Always display "3/4" not "0.75"
+2. **Breaking button head positioning**: The +5 offset is critical
+3. **Missing side views**: Washers and nuts need side profile views
+4. **Assuming all bolts are "bolts"**: Phillips and Button heads are "screws" in common usage
+5. **Forgetting $fn for circles**: Undefined $fn can create unexpected polygons
+6. **Ignoring display_text parameter**: Must flow through to render_text()
 
-////////////////////////////////////////////////////////
-//               PHILLIPS HEAD ICONS                 //
-////////////////////////////////////////////////////////
+### Historical Context
 
-module phillips_bolt_icon(length_mm, y_pos) {
-    head_x = -min(length_mm, max_bolt_length)/2 - 3;
-    z_pos = label_thickness;
-    
-    // Top view - round head with Phillips cross
-    translate([head_x, y_pos, z_pos]) {
-        difference() {
-            cylinder(h = text_height, d = 4, $fn = 32);  // Round head
-            translate([-1.5, -0.3, 0]) cube([3, 0.6, text_height]);
-            translate([-0.3, -1.5, 0]) cube([0.6, 3, text_height]);
-        }
-    }
-    
-    // Side view - cylindrical head
-    translate([head_x + 3, y_pos - 2, z_pos]) {
-        cube([2, 4, text_height]);
-    }
-    
-    bolt_stem(length_mm, head_x + 5, y_pos);
-}
+#### Version Evolution
+- **v15**: Had quotation marks in display, wrong thread ordering, decimal display issues
+- **v16**: Fixed quotation marks, proper thread sort, fractional display, added batch mode
+- **v16.1**: Fixed icon geometry, custom text handling, nomenclature (bolt vs screw)
 
-module phillips_countersunk_icon(length_mm, y_pos) {
-    head_x = -min(length_mm, max_bolt_length)/2 - 2;
-    z_pos = label_thickness;
-    
-    // Top view - round head with Phillips cross
-    translate([head_x, y_pos, z_pos]) {
-        difference() {
-            cylinder(h = text_height, d = 4, $fn = 32);  // Round head
-            translate([-1.5, -0.3, 0]) cube([3, 0.6, text_height]);
-            translate([-0.3, -1.5, 0]) cube([0.6, 3, text_height]);
-        }
-    }
-    
-    // Side view - angled countersunk profile
-    translate([head_x + 3, y_pos, z_pos]) {
-        linear_extrude(height = text_height) {
-            polygon(points = [[0, -2], [2.5, 0], [0, 2]]);
-        }
-    }
-    
-    bolt_stem(length_mm, head_x + 4, y_pos);
-}
+#### Design Decisions
+- **No mounting holes**: Removed for cleaner appearance and easier printing
+- **White/black default**: Maximum contrast for readability
+- **Raised text (0.3mm)**: Optimized for both visibility and print reliability
+- **Small default size**: Most common for typical parts bins
 
-module phillips_wood_screw_icon(length_mm, y_pos) {
-    head_x = -min(length_mm, max_bolt_length)/2 - 2;
-    z_pos = label_thickness;
-    
-    translate([head_x, y_pos, z_pos]) {
-        difference() {
-            cylinder(h = text_height, d = 4);
-            translate([-1.5, -0.3, 0]) cube([3, 0.6, text_height]);
-            translate([-0.3, -1.5, 0]) cube([0.6, 3, text_height]);
-        }
-    }
-    
-    translate([head_x + 3, y_pos, z_pos]) {
-        linear_extrude(height = text_height) {
-            polygon(points = [[0, -2], [2.5, 0], [0, 2]]);
-        }
-    }
-    
-    stem_length = max(0, length_mm - 2);
-    if (stem_length > 0) {
-        bolt_stem(stem_length, head_x + 4, y_pos);
-        
-        tip_x = head_x + 4 + min(stem_length, max_bolt_length);
-        translate([tip_x, y_pos, z_pos]) {
-            linear_extrude(height = text_height) {
-                polygon(points = [[0, -1], [1.5, 0], [0, 1]]);
-            }
-        }
-    }
-}
+### Future Modification Guidelines
 
-////////////////////////////////////////////////////////
-//                SOCKET HEAD ICONS                  //
-////////////////////////////////////////////////////////
+When adding new hardware types:
+1. Study similar existing icons for pattern consistency
+2. Maintain separate top and side view components
+3. Use consistent positioning relative to existing icons
+4. Test with all three label sizes
+5. Ensure text generation follows established patterns
+6. Add to both single and batch mode dropdowns
 
-module socket_bolt_icon(length_mm, y_pos) {
-    head_x = -min(length_mm, max_bolt_length)/2 - 3;
-    z_pos = label_thickness;
-    
-    // Top view - round head with hex socket
-    translate([head_x, y_pos, z_pos]) {
-        difference() {
-            cylinder(h = text_height, d = 4, $fn = 32);  // Round head
-            cylinder(h = text_height, d = 2.5, $fn = 6);  // Hex socket
-        }
-    }
-    
-    // Side view - cylindrical head
-    translate([head_x + 3, y_pos - 2, z_pos]) {
-        cube([3, 4, text_height]);
-    }
-    
-    bolt_stem(length_mm, head_x + 5, y_pos);
-}
+When modifying existing icons:
+1. Document WHY the change is needed
+2. Test across all label sizes and lengths
+3. Verify custom text still works
+4. Check batch generation still functions
+5. Compare before/after with multiple examples
 
-module socket_countersunk_icon(length_mm, y_pos) {
-    head_x = -min(length_mm, max_bolt_length)/2 - 2;
-    z_pos = label_thickness;
-    
-    translate([head_x, y_pos, z_pos]) {
-        difference() {
-            cylinder(h = text_height, d = 4);
-            cylinder(h = text_height, d = 2.5, $fn = 6);
-        }
-    }
-    
-    translate([head_x + 3, y_pos, z_pos]) {
-        linear_extrude(height = text_height) {
-            polygon(points = [[0, -2], [2.5, 0], [0, 2]]);
-        }
-    }
-    
-    bolt_stem(length_mm, head_x + 4, y_pos);
-}
+### Critical Files and Functions
 
-////////////////////////////////////////////////////////
-//                HEX HEAD ICON                      //
-////////////////////////////////////////////////////////
+Key functions that should be modified with extreme caution:
+- `bolt_stem()`: Core stem rendering, affects all bolts
+- `label_content()`: Central routing for all content rendering  
+- `render_text()`: Text positioning affects all labels
+- `fraction_to_decimal()`: Must maintain all 29 conversions exactly
 
-module hex_bolt_icon(length_mm, y_pos) {
-    head_x = -min(length_mm, max_bolt_length)/2 - 3;
-    z_pos = label_thickness;
-    
-    translate([head_x, y_pos, z_pos]) {
-        cylinder(h = text_height, d = 4, $fn = 6);
-    }
-    
-    translate([head_x + 3, y_pos - 2, z_pos]) {
-        cube([2.5, 4, text_height]);
-    }
-    
-    bolt_stem(length_mm, head_x + 4.5, y_pos);
-}
+Parameters that cascade through the system:
+- `display_text`: Must flow from main → create_single_label → label_content → render_text
+- `length_mm`: Affects icon scaling and stem length
+- `text_height`: Global affect on all raised elements
 
-////////////////////////////////////////////////////////
-//               BUTTON HEAD ICON                    //
-////////////////////////////////////////////////////////
-
-module button_bolt_icon(length_mm, y_pos) {
-    head_x = -min(length_mm, max_bolt_length)/2 - 3;
-    z_pos = label_thickness;
-    
-    // Top view - round head with hex socket
-    translate([head_x, y_pos, z_pos]) {
-        difference() {
-            cylinder(h = text_height, d = 4, $fn = 32);  // Round head
-            cylinder(h = text_height, d = 2.5, $fn = 6);  // Hex socket
-        }
-    }
-    
-    // Side view - original logic restored
-    translate([head_x + 5, y_pos, z_pos]) {
-        linear_extrude(height = text_height) {
-            intersection() {
-                circle(d = 4);
-                translate([-2, -2]) square([2, 4]);
-            }
-        }
-    }
-    
-    bolt_stem(length_mm, head_x + 5, y_pos);
-}
-
-////////////////////////////////////////////////////////
-//                TORX HEAD ICONS                    //
-////////////////////////////////////////////////////////
-
-module torx_star(size) {
-    for (i = [0:5]) {
-        rotate([0, 0, i * 60]) {
-            translate([0, -size/2, 0]) {
-                hull() {
-                    circle(d = 0.25);
-                    translate([0, size, 0]) circle(d = 0.25);
-                }
-            }
-        }
-    }
-}
-
-module torx_bolt_icon(length_mm, y_pos) {
-    head_x = -min(length_mm, max_bolt_length)/2 - 3;
-    z_pos = label_thickness;
-    
-    // Top view - round head with Torx star socket
-    translate([head_x, y_pos, z_pos]) {
-        difference() {
-            cylinder(h = text_height, d = 4, $fn = 32);  // Round head
-            linear_extrude(height = text_height) torx_star(2);  // Torx star socket
-        }
-    }
-    
-    // Side view - cylindrical head
-    translate([head_x + 3, y_pos - 2, z_pos]) {
-        cube([3, 4, text_height]);
-    }
-    
-    bolt_stem(length_mm, head_x + 5, y_pos);
-}
-
-module torx_countersunk_icon(length_mm, y_pos) {
-    head_x = -min(length_mm, max_bolt_length)/2 - 2;
-    z_pos = label_thickness;
-    
-    translate([head_x, y_pos, z_pos]) {
-        difference() {
-            cylinder(h = text_height, d = 4);
-            linear_extrude(height = text_height) torx_star(2);
-        }
-    }
-    
-    translate([head_x + 3, y_pos, z_pos]) {
-        linear_extrude(height = text_height) {
-            polygon(points = [[0, -2], [2.5, 0], [0, 2]]);
-        }
-    }
-    
-    bolt_stem(length_mm, head_x + 4, y_pos);
-}
-
-module torx_wood_screw_icon(length_mm, y_pos) {
-    head_x = -min(length_mm, max_bolt_length)/2 - 2;
-    z_pos = label_thickness;
-    
-    translate([head_x, y_pos, z_pos]) {
-        difference() {
-            cylinder(h = text_height, d = 4);
-            linear_extrude(height = text_height) torx_star(2);
-        }
-    }
-    
-    translate([head_x + 3, y_pos, z_pos]) {
-        linear_extrude(height = text_height) {
-            polygon(points = [[0, -2], [2.5, 0], [0, 2]]);
-        }
-    }
-    
-    stem_length = max(0, length_mm - 2);
-    if (stem_length > 0) {
-        bolt_stem(stem_length, head_x + 4, y_pos);
-        
-        tip_x = head_x + 4 + min(stem_length, max_bolt_length);
-        translate([tip_x, y_pos, z_pos]) {
-            linear_extrude(height = text_height) {
-                polygon(points = [[0, -1], [1.5, 0], [0, 1]]);
-            }
-        }
-    }
-}
-
-////////////////////////////////////////////////////////
-//            SPECIALIZED HARDWARE                   //
-////////////////////////////////////////////////////////
-
-module wall_anchor_icon(length_mm, y_pos) {
-    z_pos = label_thickness;
-    start_x = -min(length_mm, max_bolt_length)/2 - 4;
-    
-    for (i = [0:4]) {
-        translate([start_x + i * 1.5, y_pos, z_pos]) {
-            linear_extrude(height = text_height) {
-                polygon(points = [[-0.75, -1.5], [0.75, -1.25], [0.75, 1.25], [-0.75, 1.5]]);
-            }
-        }
-    }
-    
-    if (length_mm > 6) {
-        translate([start_x + 6, y_pos - 1.25, z_pos]) {
-            cube([min(length_mm - 6, max_bolt_length - 6), 2.5, text_height]);
-        }
-    }
-}
-
-module heat_insert_icon(length_mm, y_pos) {
-    z_pos = label_thickness;
-    center_x = 0;
-    
-    translate([center_x - 1.5, y_pos, z_pos]) {
-        difference() {
-            cylinder(h = text_height, d = 3);
-            cylinder(h = text_height, d = 2);
-        }
-    }
-    
-    for (i = [0:2]) {
-        translate([center_x + 1.5 + i * 1.5, y_pos - 1.5, z_pos]) {
-            cube([0.75, 3, text_height]);
-        }
-    }
-}
-
-////////////////////////////////////////////////////////
-//              NUTS AND WASHERS                     //
-////////////////////////////////////////////////////////
-
-module standard_nut_icon(y_pos) {
-    z_pos = label_thickness;
-    center_x = 0;
-    
-    // Top view - hex outside, smooth circular hole inside
-    translate([center_x - 1.5, y_pos, z_pos]) {
-        difference() {
-            cylinder(h = text_height, d = 4, $fn = 6);
-            cylinder(h = text_height, d = 2.5, $fn = 32);  // Smooth circular hole
-        }
-    }
-    
-    // Side view - simple rectangular profile
-    translate([center_x + 1.5, y_pos - 2, z_pos]) {
-        cube([2.5, 4, text_height]);
-    }
-}
-
-module lock_nut_icon(y_pos) {
-    z_pos = label_thickness;
-    center_x = 0;
-    
-    // Top view - hex outside, smooth circular hole inside
-    translate([center_x - 1.5, y_pos, z_pos]) {
-        difference() {
-            cylinder(h = text_height, d = 4, $fn = 6);
-            cylinder(h = text_height, d = 2.5, $fn = 32);  // Smooth circular hole
-        }
-    }
-    
-    // Side view - shows nylon insert at top
-    // Base hex portion
-    translate([center_x + 1.5, y_pos - 2, z_pos]) {
-        cube([2, 4, text_height]);
-    }
-    // Nylon insert portion (slightly narrower, at top)
-    translate([center_x + 3.5, y_pos - 1.5, z_pos]) {
-        cube([1.5, 3, text_height]);
-    }
-}
-
-module standard_washer_icon(y_pos) {
-    z_pos = label_thickness;
-    center_x = 0;
-    
-    // Top view - simple ring shape with smooth circles
-    translate([center_x - 1, y_pos, z_pos]) {
-        difference() {
-            cylinder(h = text_height, d = 4, $fn = 32);  // Smooth outer circle
-            cylinder(h = text_height, d = 2.5, $fn = 32);  // Smooth inner hole
-        }
-    }
-    
-    // Side view - thin rectangular profile
-    translate([center_x + 1.5, y_pos - 2, z_pos]) {
-        cube([0.75, 4, text_height]);
-    }
-}
-
-module sae_washer_icon(y_pos) {
-    z_pos = label_thickness;
-    center_x = 0;
-    
-    // Top view - simple ring shape with smooth circles (same as standard)
-    translate([center_x - 1, y_pos, z_pos]) {
-        difference() {
-            cylinder(h = text_height, d = 4, $fn = 32);  // Smooth outer circle
-            cylinder(h = text_height, d = 2.5, $fn = 32);  // Smooth inner hole
-        }
-    }
-    
-    // Side view - thicker rectangular profile for SAE
-    translate([center_x + 1.5, y_pos - 2, z_pos]) {
-        cube([1.5, 4, text_height]);  // 2x thickness compared to standard washer
-    }
-}
-
-module lock_washer_icon(y_pos) {
-    z_pos = label_thickness;
-    center_x = 0;
-    
-    translate([center_x - 1, y_pos, z_pos]) {
-        difference() {
-            cylinder(h = text_height, d = 4, $fn = 32);  // Smooth outer circle
-            cylinder(h = text_height, d = 2.5, $fn = 32);  // Smooth inner hole
-            translate([0, -0.3, 0]) cube([4, 0.6, text_height]);  // Gap for lock/spring
-        }
-    }
-    
-    translate([center_x + 1.5, y_pos - 2, z_pos]) {
-        cube([0.75, 4, text_height]);
-    }
-}
+This specification ensures robust Imperial hardware label generation with accurate icon representations, flexible custom text options, and user-friendly fractional interfaces while maintaining clean, printable geometry optimized for dual-color 3D printing.
