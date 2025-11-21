@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////
 //        Parts Bin Label Generator - IMPERIAL        //
 //         Fractional & Machine Screw Support         //
-//                     Version 95                     //
+//                     Version 96                     //
 ////////////////////////////////////////////////////////
 
 /* [Single Label Mode] */
@@ -368,9 +368,14 @@ module phillips_bolt_icon(length_mm, y_pos) {
         }
     }
     
-    // Side view - cylindrical head
-    translate([head_x + 3, y_pos - 2, z_pos]) {
-        cube([2, 4, text_height]);
+    // Side view - rounded dome head (like button head)
+    translate([head_x + 3, y_pos, z_pos]) {
+        linear_extrude(height = text_height) {
+            intersection() {
+                circle(d = 4, $fn = 32);
+                translate([0, -2]) square([3, 4]);
+            }
+        }
     }
     
     bolt_stem(length_mm, head_x + 5, y_pos);
