@@ -1,9 +1,9 @@
-# 3D Printable Parts Bin Label Generator - IMPERIAL SPECIFICATION v94
+# 3D Printable Parts Bin Label Generator - IMPERIAL SPECIFICATION v95
 
 ## AI Assistant Implementation Guide (READ FIRST)
 
 **CRITICAL CONTEXT FOR AI ASSISTANTS:**
-You are working with version 94 of a mature, production-tested OpenSCAD label generator. This code has undergone extensive debugging and optimization. Many "obvious improvements" have already been tried and either failed or caused subtle issues.
+You are working with version 95 of a mature, production-tested OpenSCAD label generator. This code has undergone extensive debugging and optimization. Many "obvious improvements" have already been tried and either failed or caused subtle issues.
 
 **BEFORE MAKING ANY CHANGES:**
 1. Read the entire "Implementation Notes and Lessons Learned" section at the end of this document
@@ -31,14 +31,22 @@ Focus on adding new capabilities rather than "fixing" existing working features.
 
 ---
 
+## Version 95 Change Log
+**v95 Updates (from v94)**:
+- Changed label thickness from 0.8mm to 0.65mm for better flexibility and material savings
+- Changed small label length from 37.8mm to 35.8mm for more precise fit with standard label maker tapes
+- All other v94 features and fixes remain unchanged
+
+---
+
 ## Overview
 A parametric OpenSCAD-based system for generating customizable 3D printable single labels for parts storage bins. This specification covers Imperial hardware (machine screws #4-40 through 1"-12) with dual-color 3D printing support and fractional length dropdown interface.
 
 ## Core Requirements
 
 ### 1. Label Physical Specifications
-- **Base Dimensions**: Configurable length based on units (1-3 units: 37.8mm, 77.4mm, 113.4mm), fixed width 11.7mm
-- **Height**: 0.8mm base with 0.3mm raised text/icons (or 0.01mm flush text)
+- **Base Dimensions**: Configurable length based on units (1-3 units: 35.8mm, 77.4mm, 113.4mm), fixed width 11.7mm
+- **Height**: 0.65mm base with 0.3mm raised text/icons (or 0.01mm flush text)
 - **Material**: Single or dual-color 3D printing support
 - **Mounting**: Clean solid base with optional side retention tabs
 - **Edge Treatment**: Rounded corners with configurable radius (default 2.0mm) and chamfered top/bottom edges (default 0.2mm)
@@ -96,7 +104,7 @@ A parametric OpenSCAD-based system for generating customizable 3D printable sing
 **Scope**: System can generate complete sets of labels for one hardware type and thread specification across all available lengths
 - **Interface**: Toggle to enable batch mode with separate hardware type and thread specification dropdowns
 - **Responsive Grid Layout**: Column count adapts to label size to optimize print bed usage
-  - Small labels (37.8mm): 6 columns
+  - Small labels (35.8mm): 6 columns
   - Medium labels (77.4mm): 3 columns  
   - Large labels (113.4mm): 2 columns
 - **Spacing**: Minimal 1mm gaps between labels to reduce material waste
@@ -182,7 +190,7 @@ display_text = str(thread_spec, " x ", length_fraction)
 - `batch_thread_spec`: Thread selection for batch
 
 **Visual Properties**:
-- `label_units`: Size selection (1=Small 37.8mm, 2=Medium 77.4mm, 3=Large 113.4mm)
+- `label_units`: Size selection (1=Small 35.8mm, 2=Medium 77.4mm, 3=Large 113.4mm)
 - `base_color`: Default white (#FFFFFF), user configurable
 - `content_color`: Default black (#000000), user configurable
 - `export_mode`: Complete, Base only, or Content only
@@ -194,7 +202,7 @@ display_text = str(thread_spec, " x ", length_fraction)
 
 **Advanced Settings**:
 - `label_width`: 11.7mm
-- `label_thickness`: 0.8mm
+- `label_thickness`: 0.65mm
 - `corner_radius`: 2.0mm
 - `edge_chamfer`: 0.2mm
 - `raised_height`: 0.3mm
@@ -268,7 +276,7 @@ label_content(type, thread, display_text, length_mm) // Handles all content rend
 
 ### 12. Default Configuration
 **Standard Settings**:
-- Label size: Small (37.8mm length)
+- Label size: Small (35.8mm length)
 - Colors: White base (#FFFFFF) with black text (#000000)
 - Text: Raised 0.3mm above base
 - Font: Roboto Bold, size 3.5
@@ -278,6 +286,11 @@ label_content(type, thread, display_text, length_mm) // Handles all content rend
 - Side tabs: Enabled (1mm x 6mm rectangular tabs)
 
 ### 13. Version Control
+**v95 Updates**:
+- Changed label thickness from 0.8mm to 0.65mm for better flexibility and material savings
+- Changed small label length from 37.8mm to 35.8mm for more precise fit
+- All other v94 features preserved
+
 **v16.2 Enhancements**:
 - Increased default corner radius to 2.0mm for softer appearance
 - Updated medium label length to 78.6mm (corrected dimension)
@@ -379,7 +392,7 @@ These function names are preserved to maintain code stability.
 ### Dimensional Discrepancies
 - Label width: Code uses 11.7mm (measured/tested value) vs 11.5mm in original spec
 - Both values work, but 11.7mm provides better text spacing
-- The 37.8mm/77.4mm/113.4mm lengths are precisely calibrated for label maker tapes
+- The 35.8mm/77.4mm/113.4mm lengths are precisely calibrated for label maker tapes
 
 ### Testing Checklist for Future Modifications
 
@@ -406,12 +419,15 @@ Before accepting any icon changes, verify:
 - **v15**: Had quotation marks in display, wrong thread ordering, decimal display issues
 - **v16**: Fixed quotation marks, proper thread sort, fractional display, added batch mode
 - **v16.1**: Fixed icon geometry, custom text handling, nomenclature (bolt vs screw)
+- **v94**: Mature production version with all fixes and optimizations
+- **v95**: Adjusted label thickness (0.65mm) and small label length (35.8mm)
 
 #### Design Decisions
 - **No mounting holes**: Removed for cleaner appearance and easier printing
 - **White/black default**: Maximum contrast for readability
 - **Raised text (0.3mm)**: Optimized for both visibility and print reliability
 - **Small default size**: Most common for typical parts bins
+- **Thinner base (0.65mm)**: Better flexibility and material savings
 
 ### Future Modification Guidelines
 
