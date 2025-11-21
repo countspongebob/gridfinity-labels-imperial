@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////
 //        Parts Bin Label Generator - IMPERIAL        //
 //         Fractional & Machine Screw Support         //
-//                     Version 94                     //
+//                     Version 95                     //
 ////////////////////////////////////////////////////////
 
 /* [Single Label Mode] */
@@ -17,7 +17,7 @@ batch_hardware_type = "Phillips head screw"; // [Phillips head screw, Socket hea
 batch_thread_spec = "#4-40"; // [#4-40, #4-48, #5-40, #5-44, #6-32, #6-40, #8-32, #8-36, #10-24, #10-32, #12-24, #12-28, 1/4-20, 1/4-28, 5/16-18, 5/16-24, 3/8-16, 3/8-24, 7/16-14, 7/16-20, 1/2-13, 1/2-20, 9/16-12, 9/16-18, 5/8-11, 5/8-18, 3/4-10, 3/4-16, 7/8-9, 7/8-14, 1-8, 1-12]
 
 /* [Label Properties] */
-label_units = 1; // [1:Small (37.8mm), 2:Medium (77.4mm), 3:Large (113.4mm)]
+label_units = 1; // [1:Small (35.8mm), 2:Medium (77.4mm), 3:Large (113.4mm)]
 base_color = "#FFFFFF"; // Base label color
 content_color = "#000000"; // Text and icon color
 export_mode = "Complete"; // [Complete, Base only, Content only]
@@ -29,7 +29,7 @@ text_size = 3.5;
 
 /* [Advanced Settings] */
 label_width = 11.7;
-label_thickness = 0.8;
+label_thickness = 0.65;  // Changed from 0.8mm to 0.65mm
 corner_radius = 2.0;
 edge_chamfer = 0.2;
 raised_height = 0.3;
@@ -38,7 +38,7 @@ tab_depth = 1.0; // How far tabs extend from label edge (mm)
 tab_width = 6.0; // Width of rectangular tabs (mm)
 
 // Internal calculations
-label_length = (label_units == 1) ? 37.8 : (label_units == 2) ? 77.4 : 113.4;
+label_length = (label_units == 1) ? 35.8 : (label_units == 2) ? 77.4 : 113.4;  // Changed small from 37.8 to 35.8
 text_height = raised_height;
 font_string = str(font_family, ":style=", font_weight);
 max_bolt_length = 20 * label_units;
