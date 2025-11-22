@@ -1,9 +1,9 @@
-# 3D Printable Parts Bin Label Generator - IMPERIAL SPECIFICATION v96
+# 3D Printable Parts Bin Label Generator - IMPERIAL SPECIFICATION v99
 
 ## AI Assistant Implementation Guide (READ FIRST)
 
 **CRITICAL CONTEXT FOR AI ASSISTANTS:**
-You are working with version 96 of a mature, production-tested OpenSCAD label generator. This code has undergone extensive debugging and optimization. Many "obvious improvements" have already been tried and either failed or caused subtle issues.
+You are working with version 99 of a mature, production-tested OpenSCAD label generator. This code has undergone extensive debugging and optimization. Many "obvious improvements" have already been tried and either failed or caused subtle issues.
 
 **VERSION NUMBERING REQUIREMENTS:**
 - **ALWAYS use whole integer version numbers** (e.g., v96, v97, v98)
@@ -37,7 +37,16 @@ Focus on adding new capabilities rather than "fixing" existing working features.
 
 ---
 
-## Version 96 Change Log
+## Version 99 Change Log
+**v99 Updates**:
+- Fixed batch mode horizontal spacing (increased from 1mm to 4mm gap to account for side tabs)
+
+**v98 Updates**:
+- Fixed Phillips head screw dome position to connect properly with stem (moved from head_x+3 to head_x+5)
+
+**v97 Updates**:
+- Fixed Phillips head screw dome orientation (flat side now correctly on left, rounded on right)
+
 **v96 Updates**:
 - Fixed Phillips head screw side view icon to show proper rounded dome profile instead of flat cylindrical shape
 - Established whole integer version numbering (no decimal versions like 95.1)
@@ -118,7 +127,7 @@ A parametric OpenSCAD-based system for generating customizable 3D printable sing
   - Small labels (35.8mm): 6 columns
   - Medium labels (77.4mm): 3 columns  
   - Large labels (113.4mm): 2 columns
-- **Spacing**: Minimal 1mm gaps between labels to reduce material waste
+- **Spacing**: 4mm gap between labels horizontally (accounts for side tabs), 1mm vertically
 - **Coverage**: Automatically generates all 53 fractional lengths (1/4" through 8")
 - **Use Case**: Perfect for creating complete label sets for commonly used fastener types (e.g., all sizes of #4-40 Phillips bolts)
 
@@ -297,6 +306,15 @@ label_content(type, thread, display_text, length_mm) // Handles all content rend
 - Side tabs: Enabled (1mm x 6mm rectangular tabs)
 
 ### 13. Version Control
+**v99 Updates**:
+- Fixed batch mode horizontal spacing to prevent label overlap
+
+**v98 Updates**:
+- Fixed Phillips head screw dome position to connect with stem
+
+**v97 Updates**:
+- Fixed Phillips head screw dome orientation (flat side left, rounded right)
+
 **v96 Updates**:
 - Fixed Phillips head screw side view to show proper rounded dome profile
 - Established whole integer version numbering system
@@ -439,6 +457,9 @@ Before accepting any icon changes, verify:
 - **v94**: Mature production version with all fixes and optimizations
 - **v95**: Adjusted label thickness (0.65mm) and small label length (35.8mm)
 - **v96**: Fixed Phillips head screw dome profile, established whole integer versioning
+- **v97**: Fixed Phillips head screw dome orientation (flat left, rounded right)
+- **v98**: Fixed Phillips head screw dome position to connect with stem
+- **v99**: Fixed batch mode horizontal spacing to prevent overlap
 
 #### Design Decisions
 - **No mounting holes**: Removed for cleaner appearance and easier printing
