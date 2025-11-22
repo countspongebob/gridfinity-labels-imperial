@@ -1,8 +1,12 @@
 ////////////////////////////////////////////////////////
 //        Parts Bin Label Generator - IMPERIAL        //
 //         Fractional & Machine Screw Support         //
-//                     Version 96                     //
+//                     Version 99                     //
 ////////////////////////////////////////////////////////
+
+// Debug: Verify file loads
+echo("=== Version 99 Loaded Successfully ===");
+echo("=== If you see this in console, file is working ===");
 
 /* [Single Label Mode] */
 hardware_type = "Button head screw"; // [Phillips head screw, Socket head bolt, Hex head bolt, Button head screw, Torx head bolt, Phillips head countersunk, Torx head countersunk, Socket head countersunk, Phillips wood screw, Torx wood screw, Wall anchor, Heat set insert, Standard nut, Jam nut, Lock nut, Standard washer, SAE washer, Lock washer, Custom text, None]
@@ -46,7 +50,7 @@ max_text_width = label_length - 4; // Leave 2mm margin on each side for text
 
 // Batch spacing calculations
 grid_columns = (label_units == 1) ? 6 : (label_units == 2) ? 3 : 2;
-h_spacing = label_length + 1; // 1mm gap between labels horizontally
+h_spacing = label_length + 4; // Increased gap to account for side tabs (was +1, now +4)
 v_spacing = label_width + 1;  // 1mm gap between labels vertically
 
 // All fractional sizes for batch generation
@@ -369,11 +373,11 @@ module phillips_bolt_icon(length_mm, y_pos) {
     }
     
     // Side view - rounded dome head (like button head)
-    translate([head_x + 3, y_pos, z_pos]) {
+    translate([head_x + 5, y_pos, z_pos]) {  // Moved from +3 to +5 to connect with stem
         linear_extrude(height = text_height) {
             intersection() {
                 circle(d = 4, $fn = 32);
-                translate([0, -2]) square([3, 4]);
+                translate([-2, -2]) square([2, 4]);  // Keep LEFT half for proper dome orientation
             }
         }
     }
@@ -769,5 +773,17 @@ module lock_washer_icon(y_pos) {
     
     translate([center_x + 1.5, y_pos - 2, z_pos]) {
         cube([0.75, 4, text_height]);
+    }
+}
+
+// Debug: If nothing else renders, show this test label
+// Comment out these lines once main code is working
+if (false) {  // Change to true if you need to test
+    echo("Creating debug test label...");
+    color("red") cube([35.8, 11.7, 0.65]);
+    translate([0, 0, 0.65]) {
+        color("white") linear_extrude(0.3) {
+            text("V96 TEST", size = 3.5, halign = "center");
+        }
     }
 }
